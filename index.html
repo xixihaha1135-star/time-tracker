@@ -64,6 +64,124 @@
       h1 { font-size: 20px; }
       .tab { padding: 6px 14px; font-size: 13px; }
     }
+    /* Calendar Heatmap */
+    .calendar-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .calendar-header button {
+      background: #21262d;
+      border: 1px solid #30363d;
+      color: #c9d1d9;
+      padding: 4px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .calendar-header button:hover { border-color: #58a6ff; }
+    .calendar-header span { font-size: 18px; font-weight: 600; color: #f0f6fc; }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 8px;
+    }
+    .month-block {
+      min-width: 0;
+    }
+    .month-title {
+      text-align: center;
+      font-size: 12px;
+      color: #8b949e;
+      margin-bottom: 6px;
+    }
+    .month-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+    }
+    .day-cell {
+      aspect-ratio: 1;
+      border-radius: 2px;
+      background: #161b22;
+      cursor: pointer;
+      position: relative;
+      min-width: 0;
+    }
+    .day-cell:hover { outline: 1px solid #58a6ff; }
+    .day-cell.empty { background: transparent; cursor: default; }
+    .day-cell.empty:hover { outline: none; }
+    .day-label {
+      font-size: 8px;
+      color: #484f58;
+      position: absolute;
+      bottom: 1px;
+      right: 2px;
+    }
+    .legend {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      margin-top: 16px;
+      font-size: 12px;
+      color: #8b949e;
+    }
+    .legend-cell {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+    }
+    .day-detail {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #1c2128;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 20px;
+      min-width: 280px;
+      max-width: 90vw;
+      z-index: 100;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    .day-detail h3 {
+      margin-bottom: 12px;
+      color: #f0f6fc;
+      font-size: 16px;
+    }
+    .day-detail .record-item {
+      padding: 8px 0;
+      border-bottom: 1px solid #21262d;
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+    }
+    .day-detail .record-item:last-child { border-bottom: none; }
+    .day-detail .close-btn {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      background: none;
+      border: none;
+      color: #8b949e;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 99;
+    }
+    @media (max-width: 768px) {
+      .calendar-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+      .month-grid { gap: 1px; }
+      .day-label { font-size: 6px; }
+    }
   </style>
 </head>
 <body>
@@ -126,7 +244,134 @@
 
     // Placeholder render functions — implemented in later tasks
     function renderCalendar() {
-      document.getElementById('calendar').innerHTML = '<div class="loading">日历热力图开发中...</div>';
+      const container = document.getElementById('calendar');
+      const records = allData.records;
+      const currentYear = new Date().getFullYear();
+
+      // Aggregate by date
+      const dailyTotals = {};
+      const dailyRecords = {};
+      records.forEach(r => {
+        if (!dailyTotals[r.date]) {
+          dailyTotals[r.date] = 0;
+          dailyRecords[r.date] = [];
+        }
+        dailyTotals[r.date] += r.duration_min;
+        dailyRecords[r.date].push(r);
+      });
+
+      let viewYear = currentYear;
+
+      function buildCalendar(year) {
+        const yearKeys = Object.keys(dailyTotals).filter(k => k.startsWith(String(year)));
+        const yearVals = yearKeys.map(k => dailyTotals[k]);
+        const maxMin = yearVals.length > 0 ? Math.max(...yearVals) : 1;
+
+        function getColor(min) {
+          if (min === 0) return '#161b22';
+          const ratio = Math.min(min / maxMin, 1);
+          if (ratio < 0.25) return '#0e4429';
+          if (ratio < 0.5) return '#006d32';
+          if (ratio < 0.75) return '#26a641';
+          return '#39d353';
+        }
+
+        let html = '<div class="calendar-header">';
+        html += '<button id="prevYear">&#9664;</button>';
+        html += '<span>' + year + '</span>';
+        html += '<button id="nextYear">&#9654;</button>';
+        html += '</div>';
+        html += '<div class="calendar-grid">';
+
+        var monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+
+        for (var m = 0; m < 12; m++) {
+          html += '<div class="month-block"><div class="month-title">' + monthNames[m] + '</div>';
+          html += '<div class="month-grid">';
+
+          var firstDay = new Date(year, m, 1).getDay();
+          var daysInMonth = new Date(year, m + 1, 0).getDate();
+
+          for (var i = 0; i < firstDay; i++) {
+            html += '<div class="day-cell empty"></div>';
+          }
+
+          for (var d = 1; d <= daysInMonth; d++) {
+            var dateStr = year + '-' + String(m+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+            var total = dailyTotals[dateStr] || 0;
+            var color = getColor(total);
+            html += '<div class="day-cell" style="background:' + color + '" data-date="' + dateStr + '" data-min="' + total + '">';
+            html += '<span class="day-label">' + d + '</span>';
+            html += '</div>';
+          }
+
+          html += '</div></div>';
+        }
+
+        html += '</div>';
+        html += '<div class="legend">';
+        html += '<span>少</span>';
+        html += '<div class="legend-cell" style="background:#161b22"></div>';
+        html += '<div class="legend-cell" style="background:#0e4429"></div>';
+        html += '<div class="legend-cell" style="background:#006d32"></div>';
+        html += '<div class="legend-cell" style="background:#26a641"></div>';
+        html += '<div class="legend-cell" style="background:#39d353"></div>';
+        html += '<span>多</span>';
+        html += '</div>';
+
+        container.innerHTML = html;
+
+        // Year navigation
+        document.getElementById('prevYear').addEventListener('click', function() {
+          viewYear--;
+          buildCalendar(viewYear);
+        });
+        document.getElementById('nextYear').addEventListener('click', function() {
+          viewYear++;
+          buildCalendar(viewYear);
+        });
+
+        // Day click
+        container.querySelectorAll('.day-cell:not(.empty)').forEach(function(cell) {
+          cell.addEventListener('click', function() {
+            var date = cell.dataset.date;
+            var recs = dailyRecords[date] || [];
+            if (recs.length === 0) return;
+            showDayDetail(date, recs);
+          });
+        });
+      }
+
+      function showDayDetail(date, recs) {
+        var overlay = document.createElement('div');
+        overlay.className = 'overlay';
+        var detail = document.createElement('div');
+        detail.className = 'day-detail';
+
+        var html = '<button class="close-btn">&#10005;</button><h3>' + date + ' 时间记录</h3>';
+        recs.forEach(function(r) {
+          var hours = r.duration_min >= 60 ? Math.floor(r.duration_min/60) + 'h' + (r.duration_min%60 ? r.duration_min%60 + 'm' : '') : r.duration_min + 'm';
+          html += '<div class="record-item"><span>' + r.activity + '</span><span>' + hours + '</span></div>';
+        });
+        var totalMin = recs.reduce(function(s, r) { return s + r.duration_min; }, 0);
+        var totalH = Math.floor(totalMin / 60);
+        var totalM = totalMin % 60;
+        html += '<div class="record-item" style="font-weight:600;color:#f0f6fc;border-top:1px solid #30363d;padding-top:12px">';
+        html += '<span>合计</span><span>' + (totalH ? totalH + 'h' : '') + totalM + 'm</span></div>';
+
+        detail.innerHTML = html;
+        document.body.appendChild(overlay);
+        document.body.appendChild(detail);
+
+        function close() {
+          overlay.remove();
+          detail.remove();
+        }
+        overlay.addEventListener('click', close);
+        detail.querySelector('.close-btn').addEventListener('click', close);
+      }
+
+      buildCalendar(viewYear);
     }
     function renderTrend() {
       document.getElementById('trend').innerHTML = '<div class="loading">趋势图开发中...</div>';

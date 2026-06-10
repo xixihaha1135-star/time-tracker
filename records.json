@@ -21,6 +21,16 @@
       "activity": "AI写代码",
       "raw_input": "用AI写代码（Vibe Coding）了两小时",
       "created_at": "2026-06-10T20:51:24.948603Z"
+    },
+    {
+      "id": "20260611-071258-3ea8",
+      "date": "2026-06-11",
+      "start": "",
+      "end": "",
+      "duration_min": 30,
+      "activity": "早训",
+      "raw_input": "今天早训了半小时",
+      "created_at": "2026-06-11T07:12:58.244473Z"
     }
   ]
 }

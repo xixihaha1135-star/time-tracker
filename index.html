@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>时间统计</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -181,6 +182,51 @@
       .calendar-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
       .month-grid { gap: 1px; }
       .day-label { font-size: 6px; }
+    }
+    /* Trend Chart */
+    .trend-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .trend-controls select, .trend-controls button {
+      background: #21262d;
+      border: 1px solid #30363d;
+      color: #c9d1d9;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .trend-controls select:hover, .trend-controls button:hover { border-color: #58a6ff; }
+    .trend-chart-wrapper {
+      position: relative;
+      height: 400px;
+      background: #161b22;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .activity-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .activity-tag {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      cursor: pointer;
+      border: 1px solid #30363d;
+      background: #21262d;
+      color: #8b949e;
+      transition: all 0.2s;
+    }
+    .activity-tag.active { border-color: #58a6ff; color: #58a6ff; background: #0d1117; }
+    @media (max-width: 768px) {
+      .trend-chart-wrapper { height: 300px; padding: 8px; }
     }
   </style>
 </head>
@@ -374,7 +420,125 @@
       buildCalendar(viewYear);
     }
     function renderTrend() {
-      document.getElementById('trend').innerHTML = '<div class="loading">趋势图开发中...</div>';
+      var container = document.getElementById('trend');
+      var records = allData.records;
+
+      // Get all unique activities
+      var activitySet = {};
+      records.forEach(function(r) { activitySet[r.activity] = true; });
+      var activities = Object.keys(activitySet);
+
+      // Color palette
+      var colors = ['#58a6ff','#3fb950','#d29922','#f85149','#bc8cff','#39d353','#db61a2','#79c0ff'];
+
+      // Build controls
+      var html = '<div class="trend-controls">';
+      html += '<select id="trendRange"><option value="30">最近30天</option><option value="90">最近90天</option><option value="365">最近一年</option></select>';
+      html += '</div>';
+
+      // Activity filter tags
+      html += '<div class="activity-tags">';
+      activities.forEach(function(a, i) {
+        html += '<span class="activity-tag active" data-activity="' + a + '" style="border-color:' + colors[i % colors.length] + ';color:' + colors[i % colors.length] + '">' + a + '</span>';
+      });
+      html += '</div>';
+
+      html += '<div class="trend-chart-wrapper"><canvas id="trendCanvas"></canvas></div>';
+      container.innerHTML = html;
+
+      var chartInstance = null;
+      var selectedActivities = {};
+      activities.forEach(function(a) { selectedActivities[a] = true; });
+
+      function buildChart() {
+        var range = parseInt(document.getElementById('trendRange').value);
+        var endDate = new Date();
+        var startDate = new Date();
+        startDate.setDate(endDate.getDate() - range);
+
+        // Build date labels
+        var labels = [];
+        var d = new Date(startDate);
+        while (d <= endDate) {
+          labels.push(d.toISOString().slice(0, 10));
+          d.setDate(d.getDate() + 1);
+        }
+
+        // Build datasets
+        var datasets = [];
+        activities.forEach(function(activity, i) {
+          if (!selectedActivities[activity]) return;
+          var data = labels.map(function(date) {
+            var dayRecords = records.filter(function(r) { return r.date === date && r.activity === activity; });
+            return dayRecords.reduce(function(s, r) { return s + r.duration_min; }, 0);
+          });
+          datasets.push({
+            label: activity,
+            data: data,
+            borderColor: colors[i % colors.length],
+            backgroundColor: colors[i % colors.length] + '20',
+            tension: 0.3,
+            pointRadius: range <= 30 ? 3 : 0,
+            fill: false
+          });
+        });
+
+        if (chartInstance) chartInstance.destroy();
+
+        var canvas = document.getElementById('trendCanvas');
+        chartInstance = new Chart(canvas, {
+          type: 'line',
+          data: { labels: labels, datasets: datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+              x: {
+                ticks: { color: '#8b949e', maxTicksLimit: 10 },
+                grid: { color: '#21262d' }
+              },
+              y: {
+                ticks: {
+                  color: '#8b949e',
+                  callback: function(v) { return v >= 60 ? Math.floor(v/60) + 'h' : v + 'm'; }
+                },
+                grid: { color: '#21262d' }
+              }
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(ctx) {
+                    var v = ctx.parsed.y;
+                    return ctx.dataset.label + ': ' + (v >= 60 ? Math.floor(v/60) + 'h' + (v%60?v%60+'m':'') : v + 'm');
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+
+      // Event listeners
+      document.getElementById('trendRange').addEventListener('change', buildChart);
+
+      container.querySelectorAll('.activity-tag').forEach(function(tag) {
+        tag.addEventListener('click', function() {
+          var act = tag.dataset.activity;
+          if (selectedActivities[act]) {
+            delete selectedActivities[act];
+            tag.classList.remove('active');
+          } else {
+            selectedActivities[act] = true;
+            tag.classList.add('active');
+          }
+          buildChart();
+        });
+      });
+
+      buildChart();
     }
     function renderReport() {
       document.getElementById('report').innerHTML = '<div class="loading">分析报告开发中...</div>';

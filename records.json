@@ -1,6 +1,9 @@
 {
   "version": "1.0",
-  "aliases": {},
+  "aliases": {
+    "看英文原著": "看书",
+    "AI写代码": "AI技术研究"
+  },
   "records": [
     {
       "id": "20260610-182449-fc55",
@@ -18,7 +21,7 @@
       "start": "",
       "end": "",
       "duration_min": 120,
-      "activity": "AI写代码",
+      "activity": "AI技术研究",
       "raw_input": "用AI写代码（Vibe Coding）了两小时",
       "created_at": "2026-06-10T20:51:24.948603Z"
     },
@@ -58,7 +61,7 @@
       "start": "",
       "end": "",
       "duration_min": 15,
-      "activity": "看英文原著",
+      "activity": "看书",
       "raw_input": "看英文原著",
       "created_at": "2026-06-11T10:08:36.845667Z"
     }

@@ -2,7 +2,8 @@
   "version": "1.0",
   "aliases": {
     "看英文原著": "看书",
-    "AI写代码": "AI技术研究"
+    "AI写代码": "AI技术研究",
+    "数学作业": "做作业"
   },
   "records": [
     {
@@ -91,7 +92,7 @@
       "start": "",
       "end": "",
       "duration_min": 75,
-      "activity": "数学作业",
+      "activity": "做作业",
       "raw_input": "写了七十五分钟数学作业",
       "created_at": "2026-06-11T16:56:25.755823Z"
     }

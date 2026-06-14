@@ -1,3 +1,5 @@
+**中文** | [English](docs/README.en.md) | [Français](docs/README.fr.md) | [Español](docs/README.es.md) | [Русский](docs/README.ru.md) | [العربية](docs/README.ar.md) | [日本語](docs/README.ja.md)
+
 # Time Tracker ⏱
 
 > 时间是最核心的生产资料——你花在哪，决定了你成为谁。

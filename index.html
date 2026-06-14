@@ -823,6 +823,29 @@
       transition: background var(--transition), border-color var(--transition), color var(--transition);
     }
 
+    /* ===== Report: Summary ===== */
+    .report-summary {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .report-summary-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      transition: color var(--transition);
+    }
+    .report-summary-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.8;
+      transition: color var(--transition);
+    }
+
     /* ===== Report: Activity Ranking ===== */
     .report-ranking-title {
       font-size: 16px;
@@ -2238,11 +2261,30 @@
     html += '<div class="report-chart-legend" id="reportChartLegend"></div>';
     html += '</div>';
 
+    // Text summary of time allocation
+    var summaryParts = [];
+    var sortedCatsForSummary = Object.keys(catTotals).sort(function(a, b) {
+      return (catTotals[b] || 0) - (catTotals[a] || 0);
+    });
+    sortedCatsForSummary.forEach(function(cat) {
+      var min = catTotals[cat] || 0;
+      if (min > 0) {
+        var pct = totalMin > 0 ? (min / totalMin * 100).toFixed(0) : '0';
+        summaryParts.push(cat + ' ' + fmt(min) + '（' + pct + '%）');
+      }
+    });
+    if (summaryParts.length > 0) {
+      html += '<div class="report-summary">';
+      html += '<div class="report-summary-title">' + rangeLabel + '时间分配</div>';
+      html += '<div class="report-summary-text">' + summaryParts.join('，') + '</div>';
+      html += '</div>';
+    }
+
     // Insights
     if (insights.length > 0) {
       html += '<div class="report-insights">';
-      insights.forEach(function(text) {
-        html += '<div class="report-insight-card">' + text + '</div>';
+      insights.forEach(function(item) {
+        html += '<div class="report-insight-card">' + item.text + '</div>';
       });
       html += '</div>';
     }

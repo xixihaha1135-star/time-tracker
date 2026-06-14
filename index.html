@@ -536,6 +536,99 @@
       color: var(--accent);
     }
 
+    /* ===== Trend Chart ===== */
+    .trend-container {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .trend-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .trend-filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .trend-filter-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+      border: 2px solid transparent;
+      background: var(--bg-tertiary);
+      color: var(--text-muted);
+    }
+    .trend-filter-tag .tag-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .trend-filter-tag.active {
+      color: var(--text-primary);
+      background: var(--bg-primary);
+    }
+    .trend-filter-tag:hover {
+      opacity: 0.85;
+    }
+    .trend-time-range {
+      display: flex;
+      gap: 4px;
+      background: var(--bg-tertiary);
+      border-radius: 6px;
+      padding: 3px;
+    }
+    .trend-time-btn {
+      padding: 6px 14px;
+      border: none;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .trend-time-btn:hover {
+      color: var(--text-primary);
+    }
+    .trend-time-btn.active {
+      background: var(--accent);
+      color: var(--accent-text);
+    }
+    .trend-chart-wrap {
+      position: relative;
+      height: 400px;
+      width: 100%;
+    }
+    .trend-chart-wrap canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+    .trend-no-data {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 400px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
     /* ===== Mobile ===== */
     @media (max-width: 768px) {
       .container { padding: 16px 12px; }
@@ -576,6 +669,27 @@
         flex: none;
         max-width: 240px;
         margin: 0 auto;
+      }
+      .trend-container {
+        padding: 12px;
+      }
+      .trend-controls {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .trend-chart-wrap {
+        height: 300px;
+      }
+      .trend-no-data {
+        height: 300px;
+      }
+      .trend-filter-tag {
+        font-size: 12px;
+        padding: 3px 10px;
+      }
+      .trend-time-btn {
+        font-size: 12px;
+        padding: 5px 10px;
       }
     }
   </style>
@@ -1254,17 +1368,303 @@
   }
 
   // =========================================================================
-  // Placeholder: Trend (will be implemented in Task 5)
+  // Trend: Stacked area chart with zoom and category filters
   // =========================================================================
+  let trendState = null;    // { timeRange: 30, activeCategories: Set, chart: null }
+
+  const TREND_CATEGORY_COLORS = {
+    '学习': '#58a6ff',
+    '生活': '#d29922',
+    '运动': '#3fb950',
+    '娱乐': '#f85149',
+    '工作': '#bc8cff',
+    '其他': '#8b949e'
+  };
+
+  function getTrendCategoryColor(cat) {
+    return TREND_CATEGORY_COLORS[cat] || '#8b949e';
+  }
+
+  function destroyTrendChart() {
+    if (trendState && trendState.chart) {
+      trendState.chart.destroy();
+      trendState.chart = null;
+    }
+  }
+
+  function getTrendDateRange() {
+    const today = new Date();
+    const end = today.toISOString().slice(0, 10);
+    const start = new Date(today);
+    start.setDate(start.getDate() - (trendState?.timeRange || 30) + 1);
+    return { start: start.toISOString().slice(0, 10), end };
+  }
+
+  function getTrendAllCategories() {
+    const cats = Object.keys(appData?.categories || {});
+    const recordCats = new Set((allRecords || []).map(r => r.category).filter(Boolean));
+    recordCats.forEach(c => { if (!cats.includes(c)) cats.push(c); });
+    if (!cats.includes('其他')) cats.push('其他');
+    return cats;
+  }
+
+  function buildTrendDatasets(startDate, endDate) {
+    const activeCats = [...trendState.activeCategories];
+    if (activeCats.length === 0) return { labels: [], datasets: [] };
+
+    // Generate date array
+    const dates = [];
+    const cursor = new Date(startDate + 'T00:00:00');
+    const end = new Date(endDate + 'T00:00:00');
+    while (cursor <= end) {
+      dates.push(cursor.toISOString().slice(0, 10));
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    // Aggregate: date -> { category -> minutes }
+    const filtered = filterRecordsByDate(allRecords, startDate, endDate);
+    const dateMap = {};
+    for (const d of dates) dateMap[d] = {};
+    for (const r of filtered) {
+      const cat = r.category || getCategoryForActivity(r.activity, appData.categories);
+      if (!dateMap[r.date]) dateMap[r.date] = {};
+      dateMap[r.date][cat] = (dateMap[r.date][cat] || 0) + r.duration_min;
+    }
+
+    const datasets = activeCats.map((cat, i) => {
+      const color = getTrendCategoryColor(cat);
+      return {
+        label: cat,
+        data: dates.map(d => dateMap[d]?.[cat] || 0),
+        backgroundColor: color + '33',
+        borderColor: color,
+        borderWidth: 2,
+        fill: i === 0 ? 'origin' : '-1',
+        tension: 0.3,
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: color,
+        pointHoverBorderColor: '#fff',
+        pointHoverBorderWidth: 2
+      };
+    });
+
+    return {
+      labels: dates.map(d => { const p = d.split('-'); return p[1] + '/' + p[2]; }),
+      datasets
+    };
+  }
+
+  function buildTrendHTML(container) {
+    const allCats = getTrendAllCategories();
+    const activeCats = trendState?.activeCategories || new Set(allCats);
+
+    let html = '<div class="trend-container">';
+
+    // Controls row
+    html += '<div class="trend-controls">';
+
+    // Category filters
+    html += '<div class="trend-filters" id="trendFilters">';
+    for (const cat of allCats) {
+      const isActive = activeCats.has(cat);
+      const color = getTrendCategoryColor(cat);
+      html += '<span class="trend-filter-tag' + (isActive ? ' active' : '') + '" data-cat="' + cat + '"';
+      if (isActive) html += ' style="color:' + color + ';border-color:' + color + '"';
+      html += '><span class="tag-dot" style="background:' + color + '"></span>' + cat + '</span>';
+    }
+    html += '</div>';
+
+    // Time range buttons
+    html += '<div class="trend-time-range" id="trendTimeRange">';
+    ['7', '30', '90'].forEach(days => {
+      const isActive = (trendState?.timeRange || 30) === parseInt(days);
+      html += '<button class="trend-time-btn' + (isActive ? ' active' : '') + '" data-days="' + days + '">' + days + '天</button>';
+    });
+    html += '</div>';
+
+    html += '</div>'; // .trend-controls
+
+    // Chart wrapper
+    html += '<div class="trend-chart-wrap"><canvas id="trendChart"></canvas></div>';
+
+    html += '</div>'; // .trend-container
+
+    container.innerHTML = html;
+
+    // Bind events after DOM is inserted
+    bindTrendEvents();
+  }
+
+  function bindTrendEvents() {
+    const filterContainer = document.getElementById('trendFilters');
+    if (filterContainer) {
+      filterContainer.querySelectorAll('.trend-filter-tag').forEach(tag => {
+        tag.addEventListener('click', () => {
+          const cat = tag.dataset.cat;
+          if (trendState.activeCategories.has(cat)) {
+            trendState.activeCategories.delete(cat);
+          } else {
+            trendState.activeCategories.add(cat);
+          }
+          renderTrend();
+        });
+      });
+    }
+
+    const rangeContainer = document.getElementById('trendTimeRange');
+    if (rangeContainer) {
+      rangeContainer.querySelectorAll('.trend-time-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          trendState.timeRange = parseInt(btn.dataset.days);
+          renderTrend();
+        });
+      });
+    }
+  }
+
+  function createTrendChart(startDate, endDate) {
+    const canvas = document.getElementById('trendChart');
+    if (!canvas) return;
+
+    const { labels, datasets } = buildTrendDatasets(startDate, endDate);
+
+    if (datasets.length === 0) {
+      // All categories filtered out
+      const wrap = canvas.parentElement;
+      wrap.innerHTML = '<div class="trend-no-data">没有选中任何分类，请点击上方标签开启</div>';
+      return;
+    }
+
+    if (labels.length === 0) {
+      return;
+    }
+
+    const style = getComputedStyle(document.documentElement);
+    const textSecondary = style.getPropertyValue('--text-secondary').trim();
+    const textMuted = style.getPropertyValue('--text-muted').trim();
+    const border = style.getPropertyValue('--border').trim();
+    const bgPrimary = style.getPropertyValue('--bg-primary').trim();
+
+    trendState.chart = new Chart(canvas, {
+      type: 'line',
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: bgPrimary,
+            titleColor: textSecondary,
+            bodyColor: textSecondary,
+            borderColor: border,
+            borderWidth: 1,
+            padding: 12,
+            callbacks: {
+              title: function(ctx) {
+                const labelIdx = ctx[0].dataIndex;
+                const d = new Date(startDate + 'T00:00:00');
+                d.setDate(d.getDate() + labelIdx);
+                return d.toISOString().slice(0, 10);
+              },
+              label: function(ctx) {
+                const val = ctx.raw;
+                const total = ctx.chart.data.datasets.reduce((sum, ds) => sum + (ds.data[ctx.dataIndex] || 0), 0);
+                const pct = total > 0 ? ((val / total) * 100).toFixed(1) : '0';
+                return ' ' + ctx.dataset.label + ': ' + fmt(val) + ' (' + pct + '%)';
+              },
+              footer: function(ctx) {
+                const total = ctx.reduce((sum, item) => sum + (item.raw || 0), 0);
+                return '总计: ' + fmt(total);
+              }
+            }
+          },
+          zoom: {
+            pan: {
+              enabled: true,
+              mode: 'x'
+            },
+            zoom: {
+              wheel: {
+                enabled: true
+              },
+              pinch: {
+                enabled: true
+              },
+              mode: 'x'
+            }
+          }
+        },
+        scales: {
+          x: {
+            stacked: true,
+            grid: {
+              color: border,
+              drawBorder: false
+            },
+            ticks: {
+              color: textMuted,
+              maxTicksLimit: 10,
+              font: { size: 11 }
+            }
+          },
+          y: {
+            stacked: true,
+            grid: {
+              color: border,
+              drawBorder: false
+            },
+            ticks: {
+              color: textMuted,
+              font: { size: 11 },
+              callback: function(value) {
+                if (value >= 60) {
+                  const h = Math.floor(value / 60);
+                  const m = value % 60;
+                  return m > 0 ? h + 'h' + m + 'm' : h + 'h';
+                }
+                return value + 'm';
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
   function renderTrend() {
     const container = document.getElementById('trend-view');
-    container.innerHTML = `
-      <div class="placeholder-view">
-        <span class="placeholder-icon">📈</span>
-        <div class="placeholder-text">趋势图</div>
-        <div class="placeholder-sub">开发中...</div>
-      </div>`;
+
+    if (!allRecords || allRecords.length === 0) {
+      showEmpty('trend-view');
+      return;
+    }
+
+    // Initialize state on first render
+    if (!trendState) {
+      const allCats = getTrendAllCategories();
+      trendState = {
+        timeRange: 30,
+        activeCategories: new Set(allCats),
+        chart: null
+      };
+    }
+
+    destroyTrendChart();
+
+    const { start, end } = getTrendDateRange();
+
+    buildTrendHTML(container);
+    createTrendChart(start, end);
   }
+
 
   // =========================================================================
   // Placeholder: Report (will be implemented in Task 6)

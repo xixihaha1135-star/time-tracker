@@ -1,0 +1,56 @@
+<!--
+  day-detail 组件 — 日详情卡片
+  展示某一天的时间分配详情，含饼状图、活动列表
+  约束：min-height = width/4, max-height = width/1
+  交互：仅支持 tap 事件
+-->
+
+<view class="day-detail" bindtap="onCardTap">
+  <!-- 标题栏 -->
+  <view class="card-header">
+    <text class="card-title">{{dateLabel}}</text>
+    <text class="card-total">共 {{totalDisplay}}</text>
+  </view>
+
+  <!-- 饼状图 -->
+  <view class="pie-section">
+    <canvas
+      type="2d"
+      id="pie-canvas"
+      class="pie-canvas"
+      style="width: {{pieSize}}px; height: {{pieSize}}px;"
+    ></canvas>
+    <!-- 中心文字 -->
+    <view class="pie-center">
+      <text class="pie-total-value">{{totalDisplay}}</text>
+    </view>
+  </view>
+
+  <!-- 图例 -->
+  <view class="pie-legend" wx:if="{{activities.length > 0}}">
+    <view
+      class="legend-row"
+      wx:for="{{activities}}"
+      wx:key="activity"
+      bindtap="onActivityTap"
+      data-index="{{index}}"
+    >
+      <view class="legend-color" style="background-color: {{item.color}};"></view>
+      <view class="legend-info">
+        <text class="legend-name">{{item.activity}}</text>
+        <text class="legend-category">{{item.category}}</text>
+      </view>
+      <view class="legend-stats">
+        <text class="legend-duration">{{item.displayTime}}</text>
+        <text class="legend-pct">{{item.percentage}}%</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{activities.length === 0}}">
+    <text class="empty-icon">📝</text>
+    <text class="empty-text">这天还没有记录</text>
+    <text class="empty-hint">直接说「看书半小时」开始记录</text>
+  </view>
+</view>

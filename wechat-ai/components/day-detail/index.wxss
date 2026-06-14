@@ -1,0 +1,158 @@
+/**
+ * day-detail 组件样式
+ * 遵循微信设计规范，卡片式布局
+ * 约束：min-height = 100rpx, max-height = 800rpx
+ */
+
+/* 卡片容器 */
+.day-detail {
+  background-color: #ffffff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin: 16rpx 0;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+  min-height: 100rpx;
+  max-height: 800rpx;
+  overflow-y: auto;
+}
+
+/* 标题栏 */
+.card-header {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.card-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.card-total {
+  font-size: 24rpx;
+  color: #8e8e93;
+}
+
+/* 饼状图区域 */
+.pie-section {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24rpx;
+}
+
+.pie-canvas {
+  display: block;
+}
+
+.pie-center {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.pie-total-value {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+/* 图例列表 */
+.pie-legend {
+  border-top: 1rpx solid #f0f0f0;
+  padding-top: 16rpx;
+}
+
+.legend-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 14rpx 0;
+  border-bottom: 1rpx solid #f8f8f8;
+}
+
+.legend-row:last-child {
+  border-bottom: none;
+}
+
+.legend-color {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 4rpx;
+  margin-right: 16rpx;
+  flex-shrink: 0;
+}
+
+.legend-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.legend-name {
+  font-size: 28rpx;
+  color: #333333;
+  line-height: 1.3;
+}
+
+.legend-category {
+  font-size: 22rpx;
+  color: #8e8e93;
+  margin-top: 2rpx;
+}
+
+.legend-stats {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.legend-duration {
+  font-size: 26rpx;
+  color: #666666;
+  width: 100rpx;
+  text-align: right;
+}
+
+.legend-pct {
+  font-size: 26rpx;
+  color: #8e8e93;
+  width: 72rpx;
+  text-align: right;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 0;
+}
+
+.empty-icon {
+  font-size: 64rpx;
+  margin-bottom: 16rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999999;
+  margin-bottom: 8rpx;
+}
+
+.empty-hint {
+  font-size: 24rpx;
+  color: #cccccc;
+}

@@ -263,6 +263,279 @@
       color: var(--text-primary);
     }
 
+    /* ===== Calendar: Navigation ===== */
+    .cal-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .cal-nav-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all var(--transition);
+      user-select: none;
+    }
+    .cal-nav-btn:hover:not(:disabled) {
+      background: var(--accent);
+      color: var(--accent-text);
+      border-color: var(--accent);
+    }
+    .cal-nav-btn:disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+    }
+    .cal-nav-year {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-primary);
+      min-width: 80px;
+      text-align: center;
+      transition: color var(--transition);
+    }
+
+    /* ===== Calendar: Breadcrumb ===== */
+    .cal-breadcrumb {
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: var(--text-muted);
+      transition: color var(--transition);
+    }
+    .cal-breadcrumb a {
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .cal-breadcrumb a:hover {
+      text-decoration: underline;
+    }
+    .cal-breadcrumb .sep {
+      margin: 0 6px;
+      color: var(--text-muted);
+    }
+
+    /* ===== Calendar: Level 1 - Month Grid ===== */
+    .cal-month-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .cal-month-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .cal-month-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+    .cal-month-card.current {
+      border-color: var(--accent);
+      background: var(--bg-tertiary);
+    }
+    .cal-month-card .month-name {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      transition: color var(--transition);
+    }
+    .cal-month-card .month-hours {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+      transition: color var(--transition);
+    }
+    .cal-month-card .month-hours.zero {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    /* ===== Calendar: Level 2 - Heatmap ===== */
+    .cal-heatmap {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+      margin-bottom: 20px;
+    }
+    .cal-heatmap .day-header {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 8px 0 4px;
+      font-weight: 600;
+      transition: color var(--transition);
+    }
+    .cal-day-cell {
+      aspect-ratio: 1 / 1;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: default;
+      transition: all 0.15s;
+      min-width: 28px;
+      position: relative;
+    }
+    .cal-day-cell.has-data {
+      cursor: pointer;
+      color: #ffffff;
+    }
+    .cal-day-cell.has-data:hover {
+      transform: scale(1.2);
+      box-shadow: var(--shadow);
+      z-index: 2;
+    }
+    /* Dark theme heatmap colors */
+    [data-theme="dark"] .cal-day-cell.empty { background: #161b22; color: #484f58; }
+    [data-theme="dark"] .cal-day-cell.intensity-1 { background: #0e4429; }
+    [data-theme="dark"] .cal-day-cell.intensity-2 { background: #006d32; }
+    [data-theme="dark"] .cal-day-cell.intensity-3 { background: #26a641; }
+    [data-theme="dark"] .cal-day-cell.intensity-4 { background: #39d353; }
+    /* Light theme heatmap colors */
+    [data-theme="light"] .cal-day-cell.empty { background: #ebedf0; color: #8b949e; }
+    [data-theme="light"] .cal-day-cell.intensity-1 { background: #9be9a8; color: #1d1d1f; }
+    [data-theme="light"] .cal-day-cell.intensity-2 { background: #40c463; color: #ffffff; }
+    [data-theme="light"] .cal-day-cell.intensity-3 { background: #30a14e; color: #ffffff; }
+    [data-theme="light"] .cal-day-cell.intensity-4 { background: #216e39; color: #ffffff; }
+
+    .cal-month-stats {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      padding: 16px 20px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .cal-month-stats .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .cal-month-stats .stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      transition: color var(--transition);
+    }
+    .cal-month-stats .stat-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      transition: color var(--transition);
+    }
+
+    .cal-no-records {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    /* ===== Calendar: Level 3 - Day Detail ===== */
+    .cal-day-detail {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .cal-back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      border-radius: 6px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all var(--transition);
+      align-self: flex-start;
+      user-select: none;
+    }
+    .cal-back-btn:hover {
+      background: var(--accent);
+      color: var(--accent-text);
+      border-color: var(--accent);
+    }
+    .cal-detail-row {
+      display: flex;
+      gap: 28px;
+      align-items: flex-start;
+    }
+    .cal-doughnut-wrap {
+      flex: 0 0 240px;
+      max-width: 280px;
+      min-width: 200px;
+    }
+    .cal-record-list {
+      flex: 1;
+      min-width: 0;
+    }
+    .cal-record-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 6px;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .cal-record-item .rec-activity {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .cal-record-item .rec-category {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-left: 8px;
+    }
+    .cal-record-item .rec-duration {
+      font-weight: 600;
+      color: var(--accent);
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-left: 12px;
+    }
+    .cal-day-total {
+      text-align: center;
+      padding: 18px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .cal-day-total .total-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      transition: color var(--transition);
+    }
+    .cal-day-total .total-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
     /* ===== Mobile ===== */
     @media (max-width: 768px) {
       .container { padding: 16px 12px; }
@@ -270,6 +543,40 @@
       .toolbar-title { font-size: 20px; }
       .tab { padding: 8px 12px; font-size: 13px; }
       .theme-toggle { width: 36px; height: 36px; font-size: 16px; }
+      .cal-month-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+      .cal-month-card {
+        padding: 16px 12px;
+      }
+      .cal-month-card .month-hours {
+        font-size: 18px;
+      }
+      .cal-heatmap {
+        gap: 2px;
+      }
+      .cal-day-cell {
+        font-size: 10px;
+        border-radius: 3px;
+        min-width: 0;
+      }
+      .cal-month-stats {
+        gap: 14px;
+        padding: 12px 14px;
+      }
+      .cal-month-stats .stat-value {
+        font-size: 14px;
+      }
+      .cal-detail-row {
+        flex-direction: column;
+        gap: 20px;
+      }
+      .cal-doughnut-wrap {
+        flex: none;
+        max-width: 240px;
+        margin: 0 auto;
+      }
     }
   </style>
 </head>
@@ -587,16 +894,363 @@
   }
 
   // =========================================================================
-  // Placeholder: Calendar (will be implemented in Task 4)
+  // Calendar: 3-level drill-down heatmap
   // =========================================================================
+  let calState = null;    // { level: 1|2|3, year, month: 0-11, day }
+  let calChart = null;    // Chart.js instance for day detail doughnut
+  let calInitialized = false;
+
+  function destroyCalChart() {
+    if (calChart) {
+      calChart.destroy();
+      calChart = null;
+    }
+  }
+
+  // Build map: date string -> total minutes
+  function buildDateMap(records) {
+    const map = {};
+    for (const r of records) {
+      map[r.date] = (map[r.date] || 0) + r.duration_min;
+    }
+    return map;
+  }
+
+  // Get heatmap intensity level (0-4) for a day based on its fraction of the
+  // month's max.  0 = empty, 1 = 0-25% of max, ..., 4 = 75-100%+ of max.
+  function getHeatmapIntensity(minutes, maxMinutes) {
+    if (minutes <= 0 || maxMinutes <= 0) return 0;
+    const ratio = minutes / maxMinutes;
+    if (ratio < 0.25) return 1;
+    if (ratio < 0.50) return 2;
+    if (ratio < 0.75) return 3;
+    return 4;
+  }
+
+  function getMonthName(i) { return (i + 1) + '月'; }
+  function getDayName(i) {
+    return ['一','二','三','四','五','六','日'][i];
+  }
+
+  // ---- Level 1: Year Overview ----
+  function renderCalendarL1(container) {
+    const { year } = calState;
+    const dateMap = buildDateMap(allRecords);
+
+    // Available years from data (always allow current year at minimum)
+    const dataYears = new Set(allRecords.map(r => parseInt(r.date.slice(0, 4))));
+    const available = Array.from(dataYears).sort();
+    if (available.length === 0) available.push(year);
+    const minYear = available[0];
+    const maxYear = available[available.length - 1];
+
+    let html = '';
+
+    // Year navigation
+    html += '<div class="cal-nav">';
+    html += `<button class="cal-nav-btn" ${year <= minYear ? 'disabled' : ''} onclick="calNavYear(-1)">&lt;</button>`;
+    html += `<span class="cal-nav-year">${year}</span>`;
+    html += `<button class="cal-nav-btn" ${year >= maxYear ? 'disabled' : ''} onclick="calNavYear(1)">&gt;</button>`;
+    html += '</div>';
+
+    // 4x3 month grid
+    html += '<div class="cal-month-grid">';
+    const now = new Date();
+    const thisYear = now.getFullYear();
+    const thisMonth = now.getMonth();
+
+    for (let m = 0; m < 12; m++) {
+      const mStr = String(m + 1).padStart(2, '0');
+      const monthStart = `${year}-${mStr}-01`;
+      const monthEnd   = `${year}-${mStr}-31`;
+
+      const filtered = filterRecordsByDate(allRecords, monthStart, monthEnd);
+      const totalMin = filtered.reduce((sum, r) => sum + r.duration_min, 0);
+      const hours = totalMin > 0 ? (totalMin / 60).toFixed(1) : '0';
+
+      const isCurrent = (year === thisYear && m === thisMonth);
+      const cardExtra = isCurrent ? ' current' : '';
+      const hoursExtra = totalMin === 0 ? ' zero' : '';
+
+      html += `<div class="cal-month-card${cardExtra}" onclick="calNavMonth(${m})">`;
+      html += `<div class="month-name">${getMonthName(m)}</div>`;
+      html += `<div class="month-hours${hoursExtra}">${hours}h</div>`;
+      html += '</div>';
+    }
+    html += '</div>';
+
+    container.innerHTML = html;
+  }
+
+  // ---- Level 2: Month Heatmap ----
+  function renderCalendarL2(container) {
+    const { year, month } = calState;
+    const mStr = String(month + 1).padStart(2, '0');
+    const lastDay = new Date(year, month + 1, 0).getDate();
+    const monthStart = `${year}-${mStr}-01`;
+    const monthEnd   = `${year}-${mStr}-${String(lastDay).padStart(2, '0')}`;
+
+    const filtered = filterRecordsByDate(allRecords, monthStart, monthEnd);
+    const dateMap  = buildDateMap(filtered);
+    const values   = Object.values(dateMap);
+    const maxMin   = values.length > 0 ? Math.max(...values) : 0;
+    const totalMin = values.reduce((s, v) => s + v, 0);
+    const daysWithRecords = values.length;
+    const streak = getConsecutiveDays(allRecords);
+
+    // Mon-start offset: JS getDay() 0=Sun -> Mon=0..Sun=6
+    const firstDayJS = new Date(year, month, 1).getDay();
+    const startOffset = firstDayJS === 0 ? 6 : firstDayJS - 1;
+
+    let html = '';
+
+    // Breadcrumb
+    html += '<div class="cal-breadcrumb">';
+    html += `<a onclick="calGoLevel1()">${year}</a>`;
+    html += '<span class="sep">&gt;</span>';
+    html += `<span>${getMonthName(month)}</span>`;
+    html += '</div>';
+
+    // Heatmap grid
+    html += '<div class="cal-heatmap">';
+    for (let d = 0; d < 7; d++) {
+      html += `<div class="day-header">${getDayName(d)}</div>`;
+    }
+    for (let i = 0; i < startOffset; i++) {
+      html += '<div class="cal-day-cell empty" style="visibility:hidden"></div>';
+    }
+    for (let day = 1; day <= lastDay; day++) {
+      const dateStr = `${year}-${mStr}-${String(day).padStart(2, '0')}`;
+      const minutes = dateMap[dateStr] || 0;
+      const intensity = getHeatmapIntensity(minutes, maxMin);
+
+      let cls = 'cal-day-cell';
+      if (minutes > 0) {
+        cls += ' has-data';
+        cls += ` intensity-${intensity}`;
+      } else {
+        cls += ' empty';
+      }
+
+      const onclick = minutes > 0 ? ` onclick="calNavDay(${day})"` : '';
+      const title = minutes > 0 ? ` title="${fmt(minutes)}"` : '';
+
+      html += `<div class="${cls}"${onclick}${title}>${day}</div>`;
+    }
+    html += '</div>';
+
+    if (daysWithRecords === 0) {
+      html += '<div class="cal-no-records">暂无记录</div>';
+    }
+
+    // Stats bar
+    html += '<div class="cal-month-stats">';
+    html += `<div class="stat-item"><span class="stat-label">本月总计</span><span class="stat-value">${fmt(totalMin)}</span></div>`;
+    html += `<div class="stat-item"><span class="stat-label">有记录天数</span><span class="stat-value">${daysWithRecords} 天</span></div>`;
+    html += `<div class="stat-item"><span class="stat-label">连续记录 🔥</span><span class="stat-value">${streak} 天</span></div>`;
+    html += '</div>';
+
+    container.innerHTML = html;
+  }
+
+  // ---- Level 3: Day Detail (doughnut chart + record list) ----
+  function renderCalendarL3(container) {
+    const { year, month, day } = calState;
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+    const dayRecords = allRecords.filter(r => r.date === dateStr);
+    const totalMin = dayRecords.reduce((sum, r) => sum + r.duration_min, 0);
+
+    // Category totals for the doughnut chart
+    const catTotals = {};
+    for (const r of dayRecords) {
+      const cat = r.category || getCategoryForActivity(r.activity, appData.categories);
+      catTotals[cat] = (catTotals[cat] || 0) + r.duration_min;
+    }
+
+    let html = '';
+
+    // Breadcrumb
+    html += '<div class="cal-breadcrumb">';
+    html += `<a onclick="calGoLevel1()">${year}</a>`;
+    html += '<span class="sep">&gt;</span>';
+    html += `<a onclick="calGoLevel2()">${getMonthName(month)}</a>`;
+    html += '<span class="sep">&gt;</span>';
+    html += `<span>${day}日</span>`;
+    html += '</div>';
+
+    // Back button
+    html += '<button class="cal-back-btn" onclick="calGoLevel2()">← 返回月视图</button>';
+
+    html += '<div class="cal-day-detail">';
+
+    // Chart + record list row
+    html += '<div class="cal-detail-row">';
+    html += '<div class="cal-doughnut-wrap"><canvas id="calDoughnutChart"></canvas></div>';
+
+    html += '<div class="cal-record-list">';
+    for (const r of dayRecords) {
+      html += '<div class="cal-record-item">';
+      html += '<div>';
+      html += `<span class="rec-activity">${r.activity}</span>`;
+      html += `<span class="rec-category">${r.category || getCategoryForActivity(r.activity, appData.categories)}</span>`;
+      html += '</div>';
+      html += `<span class="rec-duration">${fmt(r.duration_min)}</span>`;
+      html += '</div>';
+    }
+    html += '</div>'; // .cal-record-list
+    html += '</div>'; // .cal-detail-row
+
+    // Total
+    html += '<div class="cal-day-total">';
+    html += '<div class="total-label">当日总计</div>';
+    html += `<div class="total-value">${fmt(totalMin)}</div>`;
+    html += '</div>';
+
+    html += '</div>'; // .cal-day-detail
+
+    container.innerHTML = html;
+
+    // Render doughnut chart
+    destroyCalChart();
+    renderDoughnutChart(catTotals, totalMin);
+  }
+
+  function renderDoughnutChart(catTotals, totalMin) {
+    const canvas = document.getElementById('calDoughnutChart');
+    if (!canvas) return;
+
+    const colors = getChartColors();
+    const labels = Object.keys(catTotals);
+    const data   = Object.values(catTotals);
+
+    // Pre-compute percentages for legend labels
+    const percentages = data.map(v =>
+      totalMin > 0 ? ((v / totalMin) * 100).toFixed(1) + '%' : '0%'
+    );
+
+    const style = getComputedStyle(document.documentElement);
+    const textSecondary = style.getPropertyValue('--text-secondary').trim();
+    const bgPrimary      = style.getPropertyValue('--bg-primary').trim();
+
+    calChart = new Chart(canvas, {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: data,
+          backgroundColor: labels.map((_, i) => colors[i % colors.length]),
+          borderColor: bgPrimary,
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        cutout: '60%',
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: textSecondary,
+              padding: 14,
+              font: { size: 12 },
+              generateLabels: function(chart) {
+                const ds = chart.data.datasets[0];
+                return chart.data.labels.map((label, i) => ({
+                  text: `${label}  ${percentages[i]}`,
+                  fillStyle: ds.backgroundColor[i],
+                  strokeStyle: ds.backgroundColor[i],
+                  lineWidth: 0,
+                  hidden: false,
+                  index: i
+                }));
+              }
+            }
+          },
+          tooltip: {
+            backgroundColor: bgPrimary,
+            titleColor: textSecondary,
+            bodyColor: textSecondary,
+            borderColor: style.getPropertyValue('--border').trim(),
+            borderWidth: 1,
+            callbacks: {
+              label: function(ctx) {
+                return ` ${ctx.label}: ${fmt(ctx.raw)} (${percentages[ctx.dataIndex]})`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // ---- Navigation ----
+  function calNavYear(dir) {
+    calState.year += dir;
+    calState.level = 1;
+    calState.month = new Date().getMonth();
+    calState.day   = null;
+    destroyCalChart();
+    renderCalendarL1(document.getElementById('calendar-view'));
+  }
+
+  function calNavMonth(m) {
+    calState.month = m;
+    calState.level = 2;
+    calState.day   = null;
+    destroyCalChart();
+    renderCalendarL2(document.getElementById('calendar-view'));
+  }
+
+  function calNavDay(d) {
+    calState.day   = d;
+    calState.level = 3;
+    destroyCalChart();
+    renderCalendarL3(document.getElementById('calendar-view'));
+  }
+
+  function calGoLevel1() {
+    calState.level = 1;
+    calState.day   = null;
+    destroyCalChart();
+    renderCalendarL1(document.getElementById('calendar-view'));
+  }
+
+  function calGoLevel2() {
+    calState.level = 2;
+    calState.day   = null;
+    destroyCalChart();
+    renderCalendarL2(document.getElementById('calendar-view'));
+  }
+
+  // ---- Main entry: renderCalendar() ----
   function renderCalendar() {
     const container = document.getElementById('calendar-view');
-    container.innerHTML = `
-      <div class="placeholder-view">
-        <span class="placeholder-icon">📅</span>
-        <div class="placeholder-text">日历热力图</div>
-        <div class="placeholder-sub">开发中...</div>
-      </div>`;
+
+    if (!allRecords || allRecords.length === 0) {
+      showEmpty('calendar-view');
+      calInitialized = false;
+      return;
+    }
+
+    // First render: initialise state to current year/month
+    if (!calInitialized) {
+      const now = new Date();
+      calState = {
+        level: 1,
+        year: now.getFullYear(),
+        month: now.getMonth(),
+        day: null
+      };
+      calInitialized = true;
+    }
+
+    destroyCalChart();
+
+    if (calState.level === 1)       renderCalendarL1(container);
+    else if (calState.level === 2)  renderCalendarL2(container);
+    else if (calState.level === 3)  renderCalendarL3(container);
   }
 
   // =========================================================================

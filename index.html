@@ -692,6 +692,228 @@
         padding: 5px 10px;
       }
     }
+
+    /* ===== Report: Time Range Selector ===== */
+    .report-time-range {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .report-time-btn {
+      padding: 8px 20px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all var(--transition);
+      user-select: none;
+    }
+    .report-time-btn:hover {
+      border-color: var(--accent);
+      color: var(--text-primary);
+    }
+    .report-time-btn.active {
+      background: var(--accent);
+      color: var(--accent-text);
+      border-color: var(--accent);
+    }
+
+    /* ===== Report: Overview Cards ===== */
+    .report-overview {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .report-overview-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .report-overview-card .card-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .report-overview-card .card-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+      transition: color var(--transition);
+    }
+    .report-overview-card .card-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ===== Report: Chart Section ===== */
+    .report-chart-section {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 28px;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .report-chart-wrap {
+      flex: 0 0 260px;
+      position: relative;
+    }
+    .report-chart-legend {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .report-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      transition: color var(--transition);
+    }
+    .report-legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .report-legend-name {
+      min-width: 40px;
+    }
+    .report-legend-pct {
+      font-weight: 600;
+      min-width: 45px;
+    }
+    .report-legend-trend {
+      font-size: 13px;
+      min-width: 50px;
+    }
+    .report-legend-trend.up { color: var(--success); }
+    .report-legend-trend.down { color: var(--danger); }
+    .report-legend-trend.flat { color: var(--text-muted); }
+
+    /* ===== Report: Insights ===== */
+    .report-insights {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .report-insight-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--success);
+      border-left: 4px solid var(--success);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      transition: background var(--transition), border-color var(--transition), color var(--transition);
+    }
+
+    /* ===== Report: Activity Ranking ===== */
+    .report-ranking-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      transition: color var(--transition);
+    }
+    .report-rank-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .report-rank-label {
+      flex: 0 0 100px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: color var(--transition);
+    }
+    .report-rank-bar-wrap {
+      flex: 1;
+      height: 22px;
+      background: var(--bg-tertiary);
+      border-radius: 4px;
+      overflow: hidden;
+      transition: background var(--transition);
+    }
+    .report-rank-bar {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s ease;
+      min-width: 2px;
+    }
+    .report-rank-duration {
+      flex: 0 0 70px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      text-align: right;
+      transition: color var(--transition);
+    }
+    .report-rank-pct {
+      flex: 0 0 45px;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: right;
+      transition: color var(--transition);
+    }
+
+    /* ===== Report: Empty state ===== */
+    .report-empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* ===== Report Mobile ===== */
+    @media (max-width: 768px) {
+      .report-overview {
+        grid-template-columns: 1fr;
+      }
+      .report-chart-section {
+        flex-direction: column;
+        gap: 20px;
+      }
+      .report-chart-wrap {
+        flex: none;
+        max-width: 240px;
+      }
+      .report-rank-label {
+        flex: 0 0 70px;
+        font-size: 12px;
+      }
+      .report-rank-duration {
+        flex: 0 0 55px;
+        font-size: 12px;
+      }
+      .report-rank-pct {
+        flex: 0 0 35px;
+        font-size: 11px;
+      }
+      .report-time-btn {
+        padding: 6px 14px;
+        font-size: 13px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1667,16 +1889,415 @@
 
 
   // =========================================================================
-  // Placeholder: Report (will be implemented in Task 6)
+  // Report: Enhanced analysis report with doughnut, insights, ranking
   // =========================================================================
+  let reportState = { range: 'week', chart: null };
+
+  const REPORT_CATEGORY_COLORS = {
+    '学习': '#58a6ff',
+    '生活': '#d29922',
+    '运动': '#3fb950',
+    '娱乐': '#f85149',
+    '工作': '#bc8cff',
+    '其他': '#8b949e'
+  };
+
+  function getReportCategoryColor(cat) {
+    return REPORT_CATEGORY_COLORS[cat] || '#8b949e';
+  }
+
+  function destroyReportChart() {
+    if (reportState.chart) {
+      reportState.chart.destroy();
+      reportState.chart = null;
+    }
+  }
+
+  // ---- Date string helper (local time, YYYY-MM-DD) ----
+
+  function toDateStr(date) {
+    var y = date.getFullYear();
+    var m = String(date.getMonth() + 1).padStart(2, '0');
+    var d = String(date.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + d;
+  }
+
+  // ---- Date range helpers ----
+
+  function getReportDateRange() {
+    var today = new Date();
+
+    if (reportState.range === 'week') {
+      var dayOfWeek = today.getDay();
+      var mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      var monday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - mondayOffset);
+      return {
+        start: toDateStr(monday),
+        end: toDateStr(today)
+      };
+    } else if (reportState.range === 'month') {
+      var firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+      return {
+        start: toDateStr(firstDay),
+        end: toDateStr(today)
+      };
+    } else {
+      // year
+      var firstDay = new Date(today.getFullYear(), 0, 1);
+      return {
+        start: toDateStr(firstDay),
+        end: toDateStr(today)
+      };
+    }
+  }
+
+  function getPreviousPeriodRange(currentStart, currentEnd) {
+    var parts = currentStart.split('-');
+    var startDate = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+    var partsE = currentEnd.split('-');
+    var endDate = new Date(+partsE[0], +partsE[1] - 1, +partsE[2]);
+    var days = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+    var prevEnd = new Date(startDate.getTime() - 24 * 60 * 60 * 1000);
+    var prevStart = new Date(prevEnd.getTime() - (days - 1) * 24 * 60 * 60 * 1000);
+    return {
+      start: toDateStr(prevStart),
+      end: toDateStr(prevEnd)
+    };
+  }
+
+  // ---- Doughnut center-text plugin ----
+
+  const reportCenterTextPlugin = {
+    id: 'reportCenterText',
+    afterDraw(chart) {
+      const { ctx, chartArea: { top, bottom, left, right } } = chart;
+      const centerX = (left + right) / 2;
+      const centerY = (top + bottom) / 2;
+      const text = chart.config._centerText || '';
+      if (!text) return;
+
+      const style = getComputedStyle(document.documentElement);
+      ctx.save();
+      ctx.font = 'bold 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillStyle = style.getPropertyValue('--text-primary').trim();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, centerX, centerY - 4);
+      ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillStyle = style.getPropertyValue('--text-muted').trim();
+      ctx.fillText('总计', centerX, centerY + 20);
+      ctx.restore();
+    }
+  };
+
+  // ---- Insights engine ----
+
+  function generateInsights(currTotals, prevTotals, currTotal, prevTotal, streak) {
+    const candidates = [];
+
+    // 1. Streak
+    if (streak >= 3) {
+      candidates.push({ priority: 0, text: '\u{1F4A1} 连续 ' + streak + ' 天有记录，保持节奏' });
+    }
+
+    if (prevTotal > 0 && currTotal > 0) {
+      var currPcts = {}, prevPcts = {};
+      var allCats = new Set();
+      Object.keys(currTotals).forEach(function(c) { allCats.add(c); });
+      Object.keys(prevTotals).forEach(function(c) { allCats.add(c); });
+      allCats.forEach(function(cat) {
+        currPcts[cat] = ((currTotals[cat] || 0) / currTotal) * 100;
+        prevPcts[cat] = ((prevTotals[cat] || 0) / prevTotal) * 100;
+      });
+
+      // 2. Entertainment jump (>= 10pp)
+      var entCurr = currPcts['娱乐'] || 0;
+      var entPrev = prevPcts['娱乐'] || 0;
+      if (entCurr - entPrev >= 10) {
+        candidates.push({
+          priority: 1,
+          text: '\u{1F4A1} 娱乐占比从 ' + entPrev.toFixed(0) + '% 上升到 ' + entCurr.toFixed(0) + '%，注意时间分配'
+        });
+      }
+
+      // Collect all significant changes (>= 5pp absolute)
+      var changes = [];
+      allCats.forEach(function(cat) {
+        if (cat === '娱乐' && entCurr - entPrev >= 10) return; // already warned
+        var diff = currPcts[cat] - prevPcts[cat];
+        if (Math.abs(diff) >= 5) {
+          changes.push({ cat: cat, diffAbs: Math.abs(diff), up: diff > 0, currPct: currPcts[cat], prevPct: prevPcts[cat] });
+        }
+      });
+      changes.sort(function(a, b) { return b.diffAbs - a.diffAbs; });
+
+      // 3. Biggest dimension shift
+      if (changes.length > 0) {
+        var biggest = changes[0];
+        var dir = biggest.up ? '增加' : '减少';
+        candidates.push({
+          priority: 2,
+          text: '\u{1F4A1} 与上个周期对比，' + biggest.cat + '维度变化最大（' + dir + ' ' + biggest.diffAbs.toFixed(0) + ' 个百分点）'
+        });
+      }
+
+      // 4. Other category changes (backfill)
+      var startIdx = changes.length > 0 ? 1 : 0;
+      for (var i = startIdx; i < changes.length; i++) {
+        var c = changes[i];
+        var cdir = c.up ? '上升' : '下降';
+        candidates.push({
+          priority: 3,
+          text: '\u{1F4A1} ' + c.cat + '占比从 ' + c.prevPct.toFixed(0) + '% ' + cdir + '到 ' + c.currPct.toFixed(0) + '%'
+        });
+      }
+    }
+
+    candidates.sort(function(a, b) { return a.priority - b.priority; });
+    return candidates.slice(0, 3);
+  }
+
+  // ---- Render: Doughnut chart ----
+
+  function renderReportDoughnut(catTotals, totalMin, prevCatTotals, prevTotalMin) {
+    var canvas = document.getElementById('reportDoughnutChart');
+    if (!canvas) return;
+
+    destroyReportChart();
+
+    var allCats = new Set();
+    Object.keys(catTotals).forEach(function(c) { allCats.add(c); });
+    Object.keys(prevCatTotals).forEach(function(c) { allCats.add(c); });
+    var sortedCats = Array.from(allCats).sort(function(a, b) {
+      return (catTotals[b] || 0) - (catTotals[a] || 0);
+    });
+
+    if (sortedCats.length === 0) return;
+
+    var data = sortedCats.map(function(c) { return catTotals[c] || 0; });
+    var colors = sortedCats.map(function(c) { return getReportCategoryColor(c); });
+
+    var style = getComputedStyle(document.documentElement);
+    var textSecondary = style.getPropertyValue('--text-secondary').trim();
+    var bgPrimary = style.getPropertyValue('--bg-primary').trim();
+
+    // Compute percentages and trend arrows
+    var percentages = data.map(function(v) {
+      return totalMin > 0 ? ((v / totalMin) * 100).toFixed(1) + '%' : '0%';
+    });
+
+    var totalPct = totalMin > 0 ? ((totalMin / totalMin) * 100).toFixed(0) : '0';
+
+    reportState.chart = new Chart(canvas, {
+      type: 'doughnut',
+      data: {
+        labels: sortedCats,
+        datasets: [{
+          data: data,
+          backgroundColor: colors,
+          borderColor: bgPrimary,
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        cutout: '62%',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: bgPrimary,
+            titleColor: textSecondary,
+            bodyColor: textSecondary,
+            borderColor: style.getPropertyValue('--border').trim(),
+            borderWidth: 1,
+            callbacks: {
+              label: function(ctx) {
+                var pct = totalMin > 0 ? ((ctx.raw / totalMin) * 100).toFixed(1) : '0';
+                return ' ' + ctx.label + ': ' + fmt(ctx.raw) + ' (' + pct + '%)';
+              }
+            }
+          }
+        }
+      },
+      plugins: [reportCenterTextPlugin]
+    });
+
+    // Store center text for the plugin
+    reportState.chart.config._centerText = fmt(totalMin);
+
+    // Build custom HTML legend with trend arrows
+    var legendEl = document.getElementById('reportChartLegend');
+    if (!legendEl) return;
+
+    var html = '';
+    for (var i = 0; i < sortedCats.length; i++) {
+      var cat = sortedCats[i];
+      var pctVal = totalMin > 0 ? ((catTotals[cat] || 0) / totalMin * 100) : 0;
+      var prevPctVal = prevTotalMin > 0 ? ((prevCatTotals[cat] || 0) / prevTotalMin * 100) : 0;
+      var diff = pctVal - prevPctVal;
+
+      var trendHtml;
+      if (prevTotalMin === 0) {
+        trendHtml = '<span class="report-legend-trend flat">--</span>';
+      } else if (diff > 0.5) {
+        trendHtml = '<span class="report-legend-trend up">↑ ' + diff.toFixed(1) + '%</span>';
+      } else if (diff < -0.5) {
+        trendHtml = '<span class="report-legend-trend down">↓ ' + Math.abs(diff).toFixed(1) + '%</span>';
+      } else {
+        trendHtml = '<span class="report-legend-trend flat">→</span>';
+      }
+
+      html += '<div class="report-legend-item">';
+      html += '<span class="report-legend-dot" style="background:' + colors[i] + '"></span>';
+      html += '<span class="report-legend-name">' + cat + '</span>';
+      html += '<span class="report-legend-pct">' + pctVal.toFixed(1) + '%</span>';
+      html += trendHtml;
+      html += '</div>';
+    }
+    legendEl.innerHTML = html;
+  }
+
+  // ---- Render: main entry ----
+
   function renderReport() {
-    const container = document.getElementById('report-view');
-    container.innerHTML = `
-      <div class="placeholder-view">
-        <span class="placeholder-icon">📊</span>
-        <div class="placeholder-text">分析报告</div>
-        <div class="placeholder-sub">开发中...</div>
-      </div>`;
+    var container = document.getElementById('report-view');
+
+    if (!allRecords || allRecords.length === 0) {
+      showEmpty('report-view');
+      return;
+    }
+
+    destroyReportChart();
+
+    var range = getReportDateRange();
+    var prev = getPreviousPeriodRange(range.start, range.end);
+
+    // Calculate metrics
+    var currRecords = filterRecordsByDate(allRecords, range.start, range.end);
+    var totalMin = currRecords.reduce(function(s, r) { return s + r.duration_min; }, 0);
+    var startParts = range.start.split('-');
+    var endParts = range.end.split('-');
+    var dayCount = Math.round((new Date(+endParts[0], +endParts[1] - 1, +endParts[2]) - new Date(+startParts[0], +startParts[1] - 1, +startParts[2])) / (1000 * 60 * 60 * 24)) + 1;
+    var dailyAvgMin = dayCount > 0 ? Math.round(totalMin / dayCount) : 0;
+    var streak = getConsecutiveDays(allRecords);
+
+    var catTotals = getCategoryTotals(allRecords, appData.categories, range.start, range.end);
+    var prevCatTotals = getCategoryTotals(allRecords, appData.categories, prev.start, prev.end);
+    var prevTotalMin = 0;
+    for (var k in prevCatTotals) { prevTotalMin += prevCatTotals[k]; }
+
+    // Activity totals for ranking
+    var activityTotals = getActivityTotals(allRecords, range.start, range.end);
+
+    // Generate insights
+    var insights = generateInsights(catTotals, prevCatTotals, totalMin, prevTotalMin, streak);
+
+    // Range labels
+    var rangeLabels = { week: '本周', month: '本月', year: '本年' };
+    var rangeLabel = rangeLabels[reportState.range] || '本周';
+
+    // ---- Build HTML ----
+    var html = '';
+
+    // Time range selector
+    html += '<div class="report-time-range" id="reportTimeRange">';
+    ['week', 'month', 'year'].forEach(function(key) {
+      var isActive = reportState.range === key;
+      html += '<button class="report-time-btn' + (isActive ? ' active' : '') + '" data-range="' + key + '">' + rangeLabels[key] + '</button>';
+    });
+    html += '</div>';
+
+    if (totalMin === 0) {
+      html += '<div class="report-empty">' + rangeLabel + '暂无记录</div>';
+      container.innerHTML = html;
+      bindReportEvents();
+      return;
+    }
+
+    // Overview cards
+    html += '<div class="report-overview">';
+    html += '<div class="report-overview-card">';
+    html += '<div class="card-label">总投入</div>';
+    html += '<div class="card-value">' + fmt(totalMin) + '</div>';
+    html += '</div>';
+    html += '<div class="report-overview-card">';
+    html += '<div class="card-label">日均投入</div>';
+    html += '<div class="card-value">' + fmt(dailyAvgMin) + '</div>';
+    html += '<div class="card-sub">共 ' + dayCount + ' 天</div>';
+    html += '</div>';
+    html += '<div class="report-overview-card">';
+    html += '<div class="card-label">连续记录</div>';
+    html += '<div class="card-value">' + streak + '天 \u{1F525}</div>';
+    html += '</div>';
+    html += '</div>';
+
+    // Chart section: doughnut + legend
+    html += '<div class="report-chart-section">';
+    html += '<div class="report-chart-wrap"><canvas id="reportDoughnutChart"></canvas></div>';
+    html += '<div class="report-chart-legend" id="reportChartLegend"></div>';
+    html += '</div>';
+
+    // Insights
+    if (insights.length > 0) {
+      html += '<div class="report-insights">';
+      insights.forEach(function(text) {
+        html += '<div class="report-insight-card">' + text + '</div>';
+      });
+      html += '</div>';
+    }
+
+    // Activity ranking
+    var entries = [];
+    for (var act in activityTotals) {
+      entries.push({ name: act, minutes: activityTotals[act], cat: getCategoryForActivity(act, appData.categories) });
+    }
+    entries.sort(function(a, b) { return b.minutes - a.minutes; });
+
+    var topEntries = entries.slice(0, 8);
+    var restEntries = entries.slice(8);
+    var restTotal = restEntries.reduce(function(s, e) { return s + e.minutes; }, 0);
+
+    var rankingList = topEntries.slice();
+    if (restEntries.length > 0) {
+      rankingList.push({ name: '其他 (' + restEntries.length + '项)', minutes: restTotal, cat: '其他' });
+    }
+
+    var maxMin = rankingList.length > 0 ? Math.max.apply(null, rankingList.map(function(e) { return e.minutes; })) : 1;
+
+    if (rankingList.length > 0) {
+      html += '<div class="report-ranking-title">活动排行</div>';
+      rankingList.forEach(function(entry) {
+        var barPct = maxMin > 0 ? (entry.minutes / maxMin * 100) : 0;
+        var sharePct = totalMin > 0 ? (entry.minutes / totalMin * 100) : 0;
+        var color = getReportCategoryColor(entry.cat);
+        html += '<div class="report-rank-item">';
+        html += '<span class="report-rank-label" title="' + entry.name + '">' + entry.name + '</span>';
+        html += '<div class="report-rank-bar-wrap"><div class="report-rank-bar" style="width:' + barPct + '%;background:' + color + '"></div></div>';
+        html += '<span class="report-rank-duration">' + fmt(entry.minutes) + '</span>';
+        html += '<span class="report-rank-pct">' + sharePct.toFixed(1) + '%</span>';
+        html += '</div>';
+      });
+    }
+
+    container.innerHTML = html;
+
+    // Render chart after DOM insertion
+    renderReportDoughnut(catTotals, totalMin, prevCatTotals, prevTotalMin);
+
+    // Bind events
+    bindReportEvents();
+  }
+
+  function bindReportEvents() {
+    var rangeEl = document.getElementById('reportTimeRange');
+    if (!rangeEl) return;
+    rangeEl.querySelectorAll('.report-time-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        reportState.range = btn.dataset.range;
+        renderReport();
+      });
+    });
   }
 
   // =========================================================================

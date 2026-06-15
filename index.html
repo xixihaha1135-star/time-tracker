@@ -5,774 +5,2359 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>时间统计</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.2.0/dist/chartjs-plugin-zoom.min.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    /* ===== CSS Variables ===== */
+    :root {
+      /* Dark theme (default) */
+      --bg-primary: #0d1117;
+      --bg-secondary: #161b22;
+      --bg-tertiary: #21262d;
+      --text-primary: #f0f6fc;
+      --text-secondary: #c9d1d9;
+      --text-muted: #8b949e;
+      --border: #30363d;
+      --accent: #1f6feb;
+      --accent-hover: #388bfd;
+      --accent-text: #ffffff;
+      --success: #3fb950;
+      --warning: #d29922;
+      --danger: #f85149;
+      --chart-1: #58a6ff;
+      --chart-2: #3fb950;
+      --chart-3: #d29922;
+      --chart-4: #f85149;
+      --chart-5: #bc8cff;
+      --chart-6: #39d353;
+      --chart-7: #db61a2;
+      --chart-8: #79c0ff;
+      --shadow: 0 4px 16px rgba(0,0,0,0.3);
+      --radius: 8px;
+      --transition: 0.3s ease;
+    }
+
+    /* Light theme */
+    [data-theme="light"] {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f5f5f7;
+      --bg-tertiary: #e8e8ed;
+      --text-primary: #1d1d1f;
+      --text-secondary: #424245;
+      --text-muted: #86868b;
+      --border: #d2d2d7;
+      --accent: #007AFF;
+      --accent-hover: #0056cc;
+      --accent-text: #ffffff;
+      --success: #34c759;
+      --warning: #ff9500;
+      --danger: #ff3b30;
+      --chart-1: #007AFF;
+      --chart-2: #34c759;
+      --chart-3: #ff9500;
+      --chart-4: #ff3b30;
+      --chart-5: #af52de;
+      --chart-6: #5856d6;
+      --chart-7: #ff2d55;
+      --chart-8: #5ac8fa;
+      --shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+
+    /* ===== Reset & Base ===== */
+    *, *::before, *::after {
+      margin: 0; padding: 0; box-sizing: border-box;
+    }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #0d1117;
-      color: #c9d1d9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-secondary);
       min-height: 100vh;
+      transition: background var(--transition), color var(--transition);
     }
     .container {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 20px;
+      padding: 24px 20px;
     }
-    h1 {
-      text-align: center;
+
+    /* ===== Toolbar ===== */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       margin-bottom: 24px;
-      font-size: 24px;
-      color: #f0f6fc;
     }
+    .toolbar-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+      transition: color var(--transition);
+    }
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      background: var(--bg-secondary);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 18px;
+      transition: all var(--transition);
+      user-select: none;
+    }
+    .theme-toggle:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--bg-tertiary);
+    }
+
+    /* ===== Loading / Empty / Error States ===== */
+    .state-message {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-muted);
+      font-size: 15px;
+      transition: color var(--transition);
+    }
+    .state-message.loading-state {
+      color: var(--text-muted);
+    }
+    .state-message.empty-state {
+      color: var(--text-muted);
+    }
+    .state-message.error-state {
+      color: var(--danger);
+    }
+    .state-message .state-icon {
+      display: block;
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.6;
+    }
+    .state-message .state-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .state-message .state-detail {
+      font-size: 13px;
+    }
+
+    /* Loading spinner */
+    .spinner {
+      display: inline-block;
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ===== Tabs ===== */
     .tabs {
       display: flex;
-      gap: 8px;
-      margin-bottom: 24px;
-      justify-content: center;
-      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 28px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 4px;
+      transition: background var(--transition), border-color var(--transition);
     }
     .tab {
-      padding: 8px 20px;
-      border: 1px solid #30363d;
-      border-radius: 6px;
-      background: #161b22;
-      color: #8b949e;
-      cursor: pointer;
-      font-size: 14px;
-      transition: all 0.2s;
-    }
-    .tab:hover { border-color: #58a6ff; color: #c9d1d9; }
-    .tab.active {
-      background: #1f6feb;
-      border-color: #1f6feb;
-      color: #fff;
-    }
-    .view { display: none; }
-    .view.active { display: block; }
-    .loading {
-      text-align: center;
-      padding: 60px;
-      color: #8b949e;
-    }
-    .error {
-      text-align: center;
-      padding: 60px;
-      color: #f85149;
-    }
-    /* Mobile */
-    @media (max-width: 768px) {
-      .container { padding: 12px; }
-      h1 { font-size: 20px; }
-      .tab { padding: 6px 14px; font-size: 13px; }
-    }
-    /* Calendar Heatmap */
-    .calendar-header {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      margin-bottom: 20px;
-    }
-    .calendar-header button {
-      background: #21262d;
-      border: 1px solid #30363d;
-      color: #c9d1d9;
-      padding: 4px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .calendar-header button:hover { border-color: #58a6ff; }
-    .calendar-header span { font-size: 18px; font-weight: 600; color: #f0f6fc; }
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap: 8px;
-    }
-    .month-block {
-      min-width: 0;
-    }
-    .month-title {
-      text-align: center;
-      font-size: 12px;
-      color: #8b949e;
-      margin-bottom: 6px;
-    }
-    .month-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 2px;
-    }
-    .day-cell {
-      aspect-ratio: 1;
-      border-radius: 2px;
-      background: #161b22;
-      cursor: pointer;
-      position: relative;
-      min-width: 0;
-    }
-    .day-cell:hover { outline: 1px solid #58a6ff; }
-    .day-cell.empty { background: transparent; cursor: default; }
-    .day-cell.empty:hover { outline: none; }
-    .day-label {
-      font-size: 8px;
-      color: #484f58;
-      position: absolute;
-      bottom: 1px;
-      right: 2px;
-    }
-    .legend {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      margin-top: 16px;
-      font-size: 12px;
-      color: #8b949e;
-    }
-    .legend-cell {
-      width: 12px;
-      height: 12px;
-      border-radius: 2px;
-    }
-    .day-detail {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #1c2128;
-      border: 1px solid #30363d;
-      border-radius: 12px;
-      padding: 20px;
-      min-width: 280px;
-      max-width: 90vw;
-      z-index: 100;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-    }
-    .day-detail h3 {
-      margin-bottom: 12px;
-      color: #f0f6fc;
-      font-size: 16px;
-    }
-    .day-detail .record-item {
-      padding: 8px 0;
-      border-bottom: 1px solid #21262d;
-      display: flex;
-      justify-content: space-between;
-      font-size: 14px;
-    }
-    .day-detail .record-item:last-child { border-bottom: none; }
-    .day-detail .close-btn {
-      position: absolute;
-      top: 8px;
-      right: 12px;
-      background: none;
+      flex: 1;
+      padding: 10px 20px;
       border: none;
-      color: #8b949e;
-      font-size: 18px;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text-muted);
       cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+      transition: all 0.2s;
+      white-space: nowrap;
     }
+    .tab:hover {
+      color: var(--text-primary);
+      background: var(--bg-tertiary);
+    }
+    .tab.active {
+      background: var(--accent);
+      color: var(--accent-text);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    /* ===== Views ===== */
+    .view {
+      display: none;
+    }
+    .view.active {
+      display: block;
+    }
+
+    /* ===== Placeholder ===== */
+    .placeholder-view {
+      text-align: center;
+      padding: 80px 20px;
+    }
+    .placeholder-view .placeholder-icon {
+      display: block;
+      font-size: 64px;
+      margin-bottom: 16px;
+      opacity: 0.4;
+    }
+    .placeholder-view .placeholder-text {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    .placeholder-view .placeholder-sub {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* ===== Overlay & Modal (shared) ===== */
     .overlay {
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,0.5);
       z-index: 99;
+      transition: background var(--transition);
     }
-    @media (max-width: 768px) {
-      .calendar-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
-      .month-grid { gap: 1px; }
-      .day-label { font-size: 6px; }
-    }
-    /* Trend Chart */
-    .trend-controls {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .trend-controls select, .trend-controls button {
-      background: #21262d;
-      border: 1px solid #30363d;
-      color: #c9d1d9;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 13px;
-      cursor: pointer;
-    }
-    .trend-controls select:hover, .trend-controls button:hover { border-color: #58a6ff; }
-    .trend-chart-wrapper {
-      position: relative;
-      height: 400px;
-      background: #161b22;
-      border-radius: 8px;
-      padding: 16px;
-    }
-    .activity-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-bottom: 12px;
-    }
-    .activity-tag {
-      padding: 4px 10px;
+    .modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
       border-radius: 12px;
-      font-size: 12px;
-      cursor: pointer;
-      border: 1px solid #30363d;
-      background: #21262d;
-      color: #8b949e;
-      transition: all 0.2s;
-    }
-    .activity-tag.active { border-color: #58a6ff; color: #58a6ff; background: #0d1117; }
-    @media (max-width: 768px) {
-      .trend-chart-wrapper { height: 300px; padding: 8px; }
-    }
-    /* Analysis Report */
-    .report-content {
-      background: #161b22;
-      border-radius: 8px;
       padding: 24px;
-      max-width: 600px;
-      margin: 0 auto;
+      min-width: 300px;
+      max-width: 90vw;
+      z-index: 100;
+      box-shadow: var(--shadow);
+      transition: background var(--transition), border-color var(--transition), box-shadow var(--transition);
     }
-    .report-section {
+    .modal .close-btn {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+      transition: color 0.2s;
+      line-height: 1;
+    }
+    .modal .close-btn:hover {
+      color: var(--text-primary);
+    }
+
+    /* ===== Calendar: Navigation ===== */
+    .cal-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
       margin-bottom: 24px;
     }
-    .report-section h3 {
-      color: #f0f6fc;
-      font-size: 16px;
-      margin-bottom: 12px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid #21262d;
-    }
-    .report-stat {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 0;
-      font-size: 14px;
-    }
-    .report-stat .label { color: #8b949e; }
-    .report-stat .value { color: #f0f6fc; font-weight: 600; }
-    .report-bar {
-      display: flex;
+    .cal-nav-btn {
+      display: inline-flex;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
-      font-size: 13px;
-    }
-    .report-bar .bar-label { width: 80px; text-align: right; color: #c9d1d9; }
-    .report-bar .bar-track {
-      flex: 1;
-      height: 20px;
-      background: #21262d;
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    .report-bar .bar-fill {
-      height: 100%;
-      border-radius: 4px;
-      transition: width 0.3s;
-    }
-    .report-bar .bar-value { width: 60px; color: #8b949e; font-size: 12px; }
-    .change-up { color: #3fb950; }
-    .change-down { color: #f85149; }
-    .change-same { color: #8b949e; }
-    .report-range-controls {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
       justify-content: center;
-    }
-    .report-range-controls button {
-      background: #21262d;
-      border: 1px solid #30363d;
-      color: #8b949e;
-      padding: 6px 14px;
+      width: 36px;
+      height: 36px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
       border-radius: 6px;
-      font-size: 13px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all var(--transition);
+      user-select: none;
+    }
+    .cal-nav-btn:hover:not(:disabled) {
+      background: var(--accent);
+      color: var(--accent-text);
+      border-color: var(--accent);
+    }
+    .cal-nav-btn:disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+    }
+    .cal-nav-year {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-primary);
+      min-width: 80px;
+      text-align: center;
+      transition: color var(--transition);
+    }
+
+    /* ===== Calendar: Breadcrumb ===== */
+    .cal-breadcrumb {
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: var(--text-muted);
+      transition: color var(--transition);
+    }
+    .cal-breadcrumb a {
+      color: var(--accent);
+      text-decoration: none;
       cursor: pointer;
     }
-    .report-range-controls button.active {
-      background: #1f6feb;
-      border-color: #1f6feb;
-      color: #fff;
+    .cal-breadcrumb a:hover {
+      text-decoration: underline;
     }
+    .cal-breadcrumb .sep {
+      margin: 0 6px;
+      color: var(--text-muted);
+    }
+
+    /* ===== Calendar: Level 1 - Month Grid ===== */
+    .cal-month-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .cal-month-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .cal-month-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+    .cal-month-card.current {
+      border-color: var(--accent);
+      background: var(--bg-tertiary);
+    }
+    .cal-month-card .month-name {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      transition: color var(--transition);
+    }
+    .cal-month-card .month-hours {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+      transition: color var(--transition);
+    }
+    .cal-month-card .month-hours.zero {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    /* ===== Calendar: Level 2 - Heatmap ===== */
+    .cal-heatmap {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+      margin-bottom: 20px;
+    }
+    .cal-heatmap .day-header {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 8px 0 4px;
+      font-weight: 600;
+      transition: color var(--transition);
+    }
+    .cal-day-cell {
+      aspect-ratio: 1 / 1;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: default;
+      transition: all 0.15s;
+      min-width: 28px;
+      position: relative;
+    }
+    .cal-day-cell.has-data {
+      cursor: pointer;
+      color: #ffffff;
+    }
+    .cal-day-cell.has-data:hover {
+      transform: scale(1.2);
+      box-shadow: var(--shadow);
+      z-index: 2;
+    }
+    /* Dark theme heatmap colors */
+    [data-theme="dark"] .cal-day-cell.empty { background: #161b22; color: #484f58; }
+    [data-theme="dark"] .cal-day-cell.intensity-1 { background: #0e4429; }
+    [data-theme="dark"] .cal-day-cell.intensity-2 { background: #006d32; }
+    [data-theme="dark"] .cal-day-cell.intensity-3 { background: #26a641; }
+    [data-theme="dark"] .cal-day-cell.intensity-4 { background: #39d353; }
+    /* Light theme heatmap colors */
+    [data-theme="light"] .cal-day-cell.empty { background: #ebedf0; color: #8b949e; }
+    [data-theme="light"] .cal-day-cell.intensity-1 { background: #9be9a8; color: #1d1d1f; }
+    [data-theme="light"] .cal-day-cell.intensity-2 { background: #40c463; color: #ffffff; }
+    [data-theme="light"] .cal-day-cell.intensity-3 { background: #30a14e; color: #ffffff; }
+    [data-theme="light"] .cal-day-cell.intensity-4 { background: #216e39; color: #ffffff; }
+
+    .cal-month-stats {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      padding: 16px 20px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .cal-month-stats .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .cal-month-stats .stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      transition: color var(--transition);
+    }
+    .cal-month-stats .stat-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      transition: color var(--transition);
+    }
+
+    .cal-no-records {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    /* ===== Calendar: Level 3 - Day Detail ===== */
+    .cal-day-detail {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .cal-back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      border-radius: 6px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all var(--transition);
+      align-self: flex-start;
+      user-select: none;
+    }
+    .cal-back-btn:hover {
+      background: var(--accent);
+      color: var(--accent-text);
+      border-color: var(--accent);
+    }
+    .cal-detail-row {
+      display: flex;
+      gap: 28px;
+      align-items: flex-start;
+    }
+    .cal-doughnut-wrap {
+      flex: 0 0 240px;
+      max-width: 280px;
+      min-width: 200px;
+    }
+    .cal-record-list {
+      flex: 1;
+      min-width: 0;
+    }
+    .cal-record-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 6px;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .cal-record-item .rec-activity {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .cal-record-item .rec-category {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-left: 8px;
+    }
+    .cal-record-item .rec-duration {
+      font-weight: 600;
+      color: var(--accent);
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-left: 12px;
+    }
+    .cal-day-total {
+      text-align: center;
+      padding: 18px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .cal-day-total .total-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      transition: color var(--transition);
+    }
+    .cal-day-total .total-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    /* ===== Trend Chart ===== */
+    .trend-container {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .trend-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .trend-filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .trend-filter-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+      border: 2px solid transparent;
+      background: var(--bg-tertiary);
+      color: var(--text-muted);
+    }
+    .trend-filter-tag .tag-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .trend-filter-tag.active {
+      color: var(--text-primary);
+      background: var(--bg-primary);
+    }
+    .trend-filter-tag:hover {
+      opacity: 0.85;
+    }
+    .trend-time-range {
+      display: flex;
+      gap: 4px;
+      background: var(--bg-tertiary);
+      border-radius: 6px;
+      padding: 3px;
+    }
+    .trend-time-btn {
+      padding: 6px 14px;
+      border: none;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .trend-time-btn:hover {
+      color: var(--text-primary);
+    }
+    .trend-time-btn.active {
+      background: var(--accent);
+      color: var(--accent-text);
+    }
+    .trend-chart-wrap {
+      position: relative;
+      height: 400px;
+      width: 100%;
+    }
+    .trend-chart-wrap canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+    .trend-no-data {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 400px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* ===== Mobile ===== */
     @media (max-width: 768px) {
-      .report-content { padding: 16px; }
-      .report-bar .bar-label { width: 60px; font-size: 12px; }
+      .container { padding: 16px 12px; }
+      .toolbar { margin-bottom: 16px; }
+      .toolbar-title { font-size: 20px; }
+      .tab { padding: 8px 12px; font-size: 13px; }
+      .theme-toggle { width: 36px; height: 36px; font-size: 16px; }
+      .cal-month-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+      .cal-month-card {
+        padding: 16px 12px;
+      }
+      .cal-month-card .month-hours {
+        font-size: 18px;
+      }
+      .cal-heatmap {
+        gap: 2px;
+      }
+      .cal-day-cell {
+        font-size: 10px;
+        border-radius: 3px;
+        min-width: 0;
+      }
+      .cal-month-stats {
+        gap: 14px;
+        padding: 12px 14px;
+      }
+      .cal-month-stats .stat-value {
+        font-size: 14px;
+      }
+      .cal-detail-row {
+        flex-direction: column;
+        gap: 20px;
+      }
+      .cal-doughnut-wrap {
+        flex: none;
+        max-width: 240px;
+        margin: 0 auto;
+      }
+      .trend-container {
+        padding: 12px;
+      }
+      .trend-controls {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .trend-chart-wrap {
+        height: 300px;
+      }
+      .trend-no-data {
+        height: 300px;
+      }
+      .trend-filter-tag {
+        font-size: 12px;
+        padding: 3px 10px;
+      }
+      .trend-time-btn {
+        font-size: 12px;
+        padding: 5px 10px;
+      }
+    }
+
+    /* ===== Report: Time Range Selector ===== */
+    .report-time-range {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .report-time-btn {
+      padding: 8px 20px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all var(--transition);
+      user-select: none;
+    }
+    .report-time-btn:hover {
+      border-color: var(--accent);
+      color: var(--text-primary);
+    }
+    .report-time-btn.active {
+      background: var(--accent);
+      color: var(--accent-text);
+      border-color: var(--accent);
+    }
+
+    /* ===== Report: Overview Cards ===== */
+    .report-overview {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .report-overview-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .report-overview-card .card-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .report-overview-card .card-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+      transition: color var(--transition);
+    }
+    .report-overview-card .card-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ===== Report: Chart Section ===== */
+    .report-chart-section {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 28px;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .report-chart-wrap {
+      flex: 0 0 260px;
+      position: relative;
+    }
+    .report-chart-legend {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .report-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      transition: color var(--transition);
+    }
+    .report-legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .report-legend-name {
+      min-width: 40px;
+    }
+    .report-legend-pct {
+      font-weight: 600;
+      min-width: 45px;
+    }
+    .report-legend-trend {
+      font-size: 13px;
+      min-width: 50px;
+    }
+    .report-legend-trend.up { color: var(--success); }
+    .report-legend-trend.down { color: var(--danger); }
+    .report-legend-trend.flat { color: var(--text-muted); }
+
+    /* ===== Report: Insights ===== */
+    .report-insights {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .report-insight-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--success);
+      border-left: 4px solid var(--success);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      transition: background var(--transition), border-color var(--transition), color var(--transition);
+    }
+
+    /* ===== Report: Summary ===== */
+    .report-summary {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .report-summary-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      transition: color var(--transition);
+    }
+    .report-summary-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.8;
+      transition: color var(--transition);
+    }
+
+    /* ===== Report: Activity Ranking ===== */
+    .report-ranking-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      transition: color var(--transition);
+    }
+    .report-rank-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .report-rank-label {
+      flex: 0 0 100px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: color var(--transition);
+    }
+    .report-rank-bar-wrap {
+      flex: 1;
+      height: 22px;
+      background: var(--bg-tertiary);
+      border-radius: 4px;
+      overflow: hidden;
+      transition: background var(--transition);
+    }
+    .report-rank-bar {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s ease;
+      min-width: 2px;
+    }
+    .report-rank-duration {
+      flex: 0 0 70px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      text-align: right;
+      transition: color var(--transition);
+    }
+    .report-rank-pct {
+      flex: 0 0 45px;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: right;
+      transition: color var(--transition);
+    }
+
+    /* ===== Report: Empty state ===== */
+    .report-empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* ===== Report Mobile ===== */
+    @media (max-width: 768px) {
+      .report-overview {
+        grid-template-columns: 1fr;
+      }
+      .report-chart-section {
+        flex-direction: column;
+        gap: 20px;
+      }
+      .report-chart-wrap {
+        flex: none;
+        max-width: 240px;
+      }
+      .report-rank-label {
+        flex: 0 0 70px;
+        font-size: 12px;
+      }
+      .report-rank-duration {
+        flex: 0 0 55px;
+        font-size: 12px;
+      }
+      .report-rank-pct {
+        flex: 0 0 35px;
+        font-size: 11px;
+      }
+      .report-time-btn {
+        padding: 6px 14px;
+        font-size: 13px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>⏱ 时间统计</h1>
-    <div class="tabs">
-      <div class="tab active" data-view="calendar">日历热力图</div>
-      <div class="tab" data-view="trend">趋势图</div>
-      <div class="tab" data-view="report">分析报告</div>
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <h1 class="toolbar-title">⏱ 时间统计</h1>
+      <button class="theme-toggle" id="themeToggle" title="切换主题" aria-label="切换主题">☀</button>
     </div>
-    <div id="calendar" class="view active">
-      <div class="loading">加载中...</div>
+
+    <!-- Tabs -->
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-view="calendar">日历热力图</button>
+      <button class="tab" data-view="trend">趋势图</button>
+      <button class="tab" data-view="report">分析报告</button>
     </div>
-    <div id="trend" class="view">
-      <div class="loading">加载中...</div>
+
+    <!-- Views -->
+    <div class="view active" id="calendar-view">
+      <div class="state-message loading-state">
+        <span class="spinner"></span>
+        <p style="margin-top:16px;font-size:14px;">加载中...</p>
+      </div>
     </div>
-    <div id="report" class="view">
-      <div class="loading">加载中...</div>
+    <div class="view" id="trend-view">
+      <div class="state-message loading-state">
+        <span class="spinner"></span>
+        <p style="margin-top:16px;font-size:14px;">加载中...</p>
+      </div>
+    </div>
+    <div class="view" id="report-view">
+      <div class="state-message loading-state">
+        <span class="spinner"></span>
+        <p style="margin-top:16px;font-size:14px;">加载中...</p>
+      </div>
     </div>
   </div>
-  <script>
-    const DATA_URL = './records.json';
-    let allData = null;
 
-    // Tab switching
-    document.querySelectorAll('.tab').forEach(tab => {
+  <script>
+  // =========================================================================
+  // Constants
+  // =========================================================================
+  const DATA_URL = './records.json';
+  const CHART_COLORS = [
+    'var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)',
+    'var(--chart-5)', 'var(--chart-6)', 'var(--chart-7)', 'var(--chart-8)'
+  ];
+
+  // =========================================================================
+  // Global state
+  // =========================================================================
+  let appData = null;       // Parsed { version, categories, aliases, records }
+  let allRecords = [];      // Shorthand reference
+
+  // =========================================================================
+  // Theme management
+  // =========================================================================
+  const Theme = {
+    KEY: 'time-tracker-theme',
+
+    get() {
+      return localStorage.getItem(this.KEY) || 'dark';
+    },
+
+    set(theme) {
+      localStorage.setItem(this.KEY, theme);
+    },
+
+    apply(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      this.set(theme);
+      // Reset chart colors after theme change — charts need re-render
+      if (appData) {
+        renderAll();
+      }
+    },
+
+    toggle() {
+      const current = this.get();
+      const next = current === 'dark' ? 'light' : 'dark';
+      this.apply(next);
+      this.updateToggleIcon();
+    },
+
+    init() {
+      const saved = this.get();
+      this.apply(saved);
+      this.updateToggleIcon();
+    },
+
+    updateToggleIcon() {
+      const btn = document.getElementById('themeToggle');
+      if (!btn) return;
+      const current = this.get();
+      btn.textContent = current === 'dark' ? '☀' : '☽';
+      btn.title = current === 'dark' ? '切换到亮色主题' : '切换到暗色主题';
+    }
+  };
+
+  // =========================================================================
+  // Utility: Resolve chart colors from CSS variables
+  // =========================================================================
+  function getChartColors() {
+    return CHART_COLORS.map(c => getComputedStyle(document.documentElement).getPropertyValue(c.replace(/var\(|\)/g, '')).trim());
+  }
+
+  // =========================================================================
+  // Utility: Format minutes to human-readable string
+  // "Xh Ym" for >=60min, "Xm" for <60min
+  // =========================================================================
+  function fmt(minutes) {
+    if (minutes == null || isNaN(minutes)) return '0m';
+    const m = Math.round(minutes);
+    if (m >= 60) {
+      const h = Math.floor(m / 60);
+      const remainder = m % 60;
+      return remainder ? h + 'h' + remainder + 'm' : h + 'h';
+    }
+    return m + 'm';
+  }
+
+  // =========================================================================
+  // Utility: Get category for an activity via reverse lookup in categories dict
+  // =========================================================================
+  function getCategoryForActivity(activity, categories) {
+    if (!categories || !activity) return '其他';
+    for (const [cat, activities] of Object.entries(categories)) {
+      if (Array.isArray(activities) && activities.includes(activity)) {
+        return cat;
+      }
+    }
+    return '其他';
+  }
+
+  // =========================================================================
+  // Utility: Calculate consecutive recording days (latest streak)
+  // =========================================================================
+  function getConsecutiveDays(records) {
+    if (!records || records.length === 0) return 0;
+
+    // Collect unique dates, sorted descending
+    const dateSet = new Set(records.map(r => r.date));
+    const dates = Array.from(dateSet).sort().reverse();
+
+    if (dates.length === 0) return 0;
+
+    let streak = 0;
+    let cursor = new Date(dates[0] + 'T00:00:00');
+
+    for (let i = 0; i < dates.length; i++) {
+      const targetStr = cursor.toISOString().slice(0, 10);
+      if (dateSet.has(targetStr)) {
+        streak++;
+        cursor.setDate(cursor.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+
+    return streak;
+  }
+
+  // =========================================================================
+  // Utility: Parse date string to Date object
+  // =========================================================================
+  function parseDate(dateStr) {
+    return new Date(dateStr + 'T00:00:00');
+  }
+
+  // =========================================================================
+  // Utility: Filter records by date range
+  // =========================================================================
+  function filterRecordsByDate(records, startDate, endDate) {
+    const start = typeof startDate === 'string' ? startDate : startDate.toISOString().slice(0, 10);
+    const end = typeof endDate === 'string' ? endDate : endDate.toISOString().slice(0, 10);
+    return records.filter(r => r.date >= start && r.date <= end);
+  }
+
+  // =========================================================================
+  // Aggregate: Category totals within a date range
+  // =========================================================================
+  function getCategoryTotals(records, categories, startDate, endDate) {
+    const totals = {};
+    const filtered = filterRecordsByDate(records, startDate, endDate);
+    for (const r of filtered) {
+      const cat = r.category || getCategoryForActivity(r.activity, categories);
+      totals[cat] = (totals[cat] || 0) + r.duration_min;
+    }
+    return totals;
+  }
+
+  // =========================================================================
+  // Aggregate: Activity totals within a date range
+  // =========================================================================
+  function getActivityTotals(records, startDate, endDate) {
+    const totals = {};
+    const filtered = filterRecordsByDate(records, startDate, endDate);
+    for (const r of filtered) {
+      totals[r.activity] = (totals[r.activity] || 0) + r.duration_min;
+    }
+    return totals;
+  }
+
+  // =========================================================================
+  // Data loading: v2 schema support with v1 fallback
+  // =========================================================================
+  async function loadData() {
+    try {
+      const resp = await fetch(DATA_URL);
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const raw = await resp.json();
+
+      // Detect version
+      const version = raw.version || '1.0';
+      const categories = raw.categories || {};
+      const aliases = raw.aliases || {};
+      let records = raw.records || [];
+
+      // v1 compatibility: auto-assign categories if missing
+      if (version === '1.0' || !records[0]?.category) {
+        records = records.map(r => ({
+          ...r,
+          category: r.category || getCategoryForActivity(r.activity, categories)
+        }));
+      }
+
+      appData = { version, categories, aliases, records };
+      allRecords = records;
+      return { version, categories, aliases, records };
+    } catch (e) {
+      showError(e.message);
+      throw e;
+    }
+  }
+
+  // =========================================================================
+  // State helpers
+  // =========================================================================
+  function showLoading(viewId) {
+    const el = document.getElementById(viewId);
+    el.innerHTML = `
+      <div class="state-message loading-state">
+        <span class="spinner"></span>
+        <p style="margin-top:16px;font-size:14px;">加载中...</p>
+      </div>`;
+  }
+
+  function showEmpty(viewId) {
+    const el = document.getElementById(viewId);
+    el.innerHTML = `
+      <div class="state-message empty-state">
+        <span class="state-icon">📭</span>
+        <div class="state-title">暂无记录</div>
+        <div class="state-detail">开始记录时间后，这里会出现可视化数据</div>
+      </div>`;
+  }
+
+  function showError(message) {
+    document.querySelectorAll('.view').forEach(v => {
+      v.innerHTML = `
+        <div class="state-message error-state">
+          <span class="state-icon">⚠</span>
+          <div class="state-title">加载失败</div>
+          <div class="state-detail">${message}</div>
+        </div>`;
+    });
+  }
+
+  // =========================================================================
+  // Tab switching
+  // =========================================================================
+  function initTabs() {
+    const tabs = document.querySelectorAll('#tabs .tab');
+    tabs.forEach(tab => {
       tab.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        // Deactivate all
+        document.querySelectorAll('#tabs .tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        // Activate selected
         tab.classList.add('active');
-        document.getElementById(tab.dataset.view).classList.add('active');
+        const viewName = tab.dataset.view;
+        document.getElementById(viewName + '-view').classList.add('active');
+
+        // Re-render on tab switch if needed
+        if (appData) {
+          renderActiveView();
+        }
       });
     });
+  }
 
-    // Load data
-    async function loadData() {
-      try {
-        const resp = await fetch(DATA_URL);
-        if (!resp.ok) throw new Error('HTTP ' + resp.status);
-        allData = await resp.json();
-        renderAll();
-      } catch (e) {
-        document.querySelectorAll('.view').forEach(v => {
-          v.innerHTML = '<div class="error">无法加载数据: ' + e.message + '</div>';
-        });
-      }
+  function renderActiveView() {
+    const activeTab = document.querySelector('#tabs .tab.active');
+    if (!activeTab || !appData) return;
+
+    const viewName = activeTab.dataset.view;
+    if (viewName === 'calendar') renderCalendar();
+    else if (viewName === 'trend') renderTrend();
+    else if (viewName === 'report') renderReport();
+  }
+
+  // =========================================================================
+  // Render orchestrator
+  // =========================================================================
+  function renderAll() {
+    if (!appData) return;
+
+    if (!allRecords || allRecords.length === 0) {
+      document.querySelectorAll('.view').forEach(v => showEmpty(v.id));
+      return;
     }
 
-    function renderAll() {
-      if (!allData || !allData.records || allData.records.length === 0) {
-        document.querySelectorAll('.view').forEach(v => {
-          v.innerHTML = '<div class="loading">暂无记录</div>';
-        });
-        return;
-      }
-      renderCalendar();
-      renderTrend();
-      renderReport();
+    renderActiveView();
+  }
+
+  // =========================================================================
+  // Calendar: 3-level drill-down heatmap
+  // =========================================================================
+  let calState = null;    // { level: 1|2|3, year, month: 0-11, day }
+  let calChart = null;    // Chart.js instance for day detail doughnut
+  let calInitialized = false;
+
+  function destroyCalChart() {
+    if (calChart) {
+      calChart.destroy();
+      calChart = null;
     }
+  }
 
-    // Placeholder render functions — implemented in later tasks
-    function renderCalendar() {
-      const container = document.getElementById('calendar');
-      const records = allData.records;
-      const currentYear = new Date().getFullYear();
-
-      // Aggregate by date
-      const dailyTotals = {};
-      const dailyRecords = {};
-      records.forEach(r => {
-        if (!dailyTotals[r.date]) {
-          dailyTotals[r.date] = 0;
-          dailyRecords[r.date] = [];
-        }
-        dailyTotals[r.date] += r.duration_min;
-        dailyRecords[r.date].push(r);
-      });
-
-      let viewYear = currentYear;
-
-      function buildCalendar(year) {
-        const yearKeys = Object.keys(dailyTotals).filter(k => k.startsWith(String(year)));
-        const yearVals = yearKeys.map(k => dailyTotals[k]);
-        const maxMin = yearVals.length > 0 ? Math.max(...yearVals) : 1;
-
-        function getColor(min) {
-          if (min === 0) return '#161b22';
-          const ratio = Math.min(min / maxMin, 1);
-          if (ratio < 0.25) return '#0e4429';
-          if (ratio < 0.5) return '#006d32';
-          if (ratio < 0.75) return '#26a641';
-          return '#39d353';
-        }
-
-        let html = '<div class="calendar-header">';
-        html += '<button id="prevYear">&#9664;</button>';
-        html += '<span>' + year + '</span>';
-        html += '<button id="nextYear">&#9654;</button>';
-        html += '</div>';
-        html += '<div class="calendar-grid">';
-
-        var monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-
-        for (var m = 0; m < 12; m++) {
-          html += '<div class="month-block"><div class="month-title">' + monthNames[m] + '</div>';
-          html += '<div class="month-grid">';
-
-          var firstDay = new Date(year, m, 1).getDay();
-          var daysInMonth = new Date(year, m + 1, 0).getDate();
-
-          for (var i = 0; i < firstDay; i++) {
-            html += '<div class="day-cell empty"></div>';
-          }
-
-          for (var d = 1; d <= daysInMonth; d++) {
-            var dateStr = year + '-' + String(m+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
-            var total = dailyTotals[dateStr] || 0;
-            var color = getColor(total);
-            html += '<div class="day-cell" style="background:' + color + '" data-date="' + dateStr + '" data-min="' + total + '">';
-            html += '<span class="day-label">' + d + '</span>';
-            html += '</div>';
-          }
-
-          html += '</div></div>';
-        }
-
-        html += '</div>';
-        html += '<div class="legend">';
-        html += '<span>少</span>';
-        html += '<div class="legend-cell" style="background:#161b22"></div>';
-        html += '<div class="legend-cell" style="background:#0e4429"></div>';
-        html += '<div class="legend-cell" style="background:#006d32"></div>';
-        html += '<div class="legend-cell" style="background:#26a641"></div>';
-        html += '<div class="legend-cell" style="background:#39d353"></div>';
-        html += '<span>多</span>';
-        html += '</div>';
-
-        container.innerHTML = html;
-
-        // Year navigation
-        document.getElementById('prevYear').addEventListener('click', function() {
-          viewYear--;
-          buildCalendar(viewYear);
-        });
-        document.getElementById('nextYear').addEventListener('click', function() {
-          viewYear++;
-          buildCalendar(viewYear);
-        });
-
-        // Day click
-        container.querySelectorAll('.day-cell:not(.empty)').forEach(function(cell) {
-          cell.addEventListener('click', function() {
-            var date = cell.dataset.date;
-            var recs = dailyRecords[date] || [];
-            if (recs.length === 0) return;
-            showDayDetail(date, recs);
-          });
-        });
-      }
-
-      function showDayDetail(date, recs) {
-        var overlay = document.createElement('div');
-        overlay.className = 'overlay';
-        var detail = document.createElement('div');
-        detail.className = 'day-detail';
-
-        var html = '<button class="close-btn">&#10005;</button><h3>' + date + ' 时间记录</h3>';
-        recs.forEach(function(r) {
-          var hours = r.duration_min >= 60 ? Math.floor(r.duration_min/60) + 'h' + (r.duration_min%60 ? r.duration_min%60 + 'm' : '') : r.duration_min + 'm';
-          html += '<div class="record-item"><span>' + r.activity + '</span><span>' + hours + '</span></div>';
-        });
-        var totalMin = recs.reduce(function(s, r) { return s + r.duration_min; }, 0);
-        var totalH = Math.floor(totalMin / 60);
-        var totalM = totalMin % 60;
-        html += '<div class="record-item" style="font-weight:600;color:#f0f6fc;border-top:1px solid #30363d;padding-top:12px">';
-        html += '<span>合计</span><span>' + (totalH ? totalH + 'h' : '') + totalM + 'm</span></div>';
-
-        detail.innerHTML = html;
-        document.body.appendChild(overlay);
-        document.body.appendChild(detail);
-
-        function close() {
-          overlay.remove();
-          detail.remove();
-        }
-        overlay.addEventListener('click', close);
-        detail.querySelector('.close-btn').addEventListener('click', close);
-      }
-
-      buildCalendar(viewYear);
+  // Build map: date string -> total minutes
+  function buildDateMap(records) {
+    const map = {};
+    for (const r of records) {
+      map[r.date] = (map[r.date] || 0) + r.duration_min;
     }
-    function renderTrend() {
-      var container = document.getElementById('trend');
-      var records = allData.records;
+    return map;
+  }
 
-      // Get all unique activities
-      var activitySet = {};
-      records.forEach(function(r) { activitySet[r.activity] = true; });
-      var activities = Object.keys(activitySet);
+  // Get heatmap intensity level (0-4) for a day based on its fraction of the
+  // month's max.  0 = empty, 1 = 0-25% of max, ..., 4 = 75-100%+ of max.
+  function getHeatmapIntensity(minutes, maxMinutes) {
+    if (minutes <= 0 || maxMinutes <= 0) return 0;
+    const ratio = minutes / maxMinutes;
+    if (ratio < 0.25) return 1;
+    if (ratio < 0.50) return 2;
+    if (ratio < 0.75) return 3;
+    return 4;
+  }
 
-      // Color palette
-      var colors = ['#58a6ff','#3fb950','#d29922','#f85149','#bc8cff','#39d353','#db61a2','#79c0ff'];
+  function getMonthName(i) { return (i + 1) + '月'; }
+  function getDayName(i) {
+    return ['一','二','三','四','五','六','日'][i];
+  }
 
-      // Build controls
-      var html = '<div class="trend-controls">';
-      html += '<select id="trendRange"><option value="30">最近30天</option><option value="90">最近90天</option><option value="365">最近一年</option></select>';
+  // ---- Level 1: Year Overview ----
+  function renderCalendarL1(container) {
+    const { year } = calState;
+    const dateMap = buildDateMap(allRecords);
+
+    // Available years from data (always allow current year at minimum)
+    const dataYears = new Set(allRecords.map(r => parseInt(r.date.slice(0, 4))));
+    const available = Array.from(dataYears).sort();
+    if (available.length === 0) available.push(year);
+    const minYear = available[0];
+    const maxYear = available[available.length - 1];
+
+    let html = '';
+
+    // Year navigation
+    html += '<div class="cal-nav">';
+    html += `<button class="cal-nav-btn" ${year <= minYear ? 'disabled' : ''} onclick="calNavYear(-1)">&lt;</button>`;
+    html += `<span class="cal-nav-year">${year}</span>`;
+    html += `<button class="cal-nav-btn" ${year >= maxYear ? 'disabled' : ''} onclick="calNavYear(1)">&gt;</button>`;
+    html += '</div>';
+
+    // 4x3 month grid
+    html += '<div class="cal-month-grid">';
+    const now = new Date();
+    const thisYear = now.getFullYear();
+    const thisMonth = now.getMonth();
+
+    for (let m = 0; m < 12; m++) {
+      const mStr = String(m + 1).padStart(2, '0');
+      const monthStart = `${year}-${mStr}-01`;
+      const monthEnd   = `${year}-${mStr}-31`;
+
+      const filtered = filterRecordsByDate(allRecords, monthStart, monthEnd);
+      const totalMin = filtered.reduce((sum, r) => sum + r.duration_min, 0);
+      const hours = totalMin > 0 ? (totalMin / 60).toFixed(1) : '0';
+
+      const isCurrent = (year === thisYear && m === thisMonth);
+      const cardExtra = isCurrent ? ' current' : '';
+      const hoursExtra = totalMin === 0 ? ' zero' : '';
+
+      html += `<div class="cal-month-card${cardExtra}" onclick="calNavMonth(${m})">`;
+      html += `<div class="month-name">${getMonthName(m)}</div>`;
+      html += `<div class="month-hours${hoursExtra}">${hours}h</div>`;
       html += '</div>';
+    }
+    html += '</div>';
 
-      // Activity filter tags
-      html += '<div class="activity-tags">';
-      activities.forEach(function(a, i) {
-        html += '<span class="activity-tag active" data-activity="' + a + '" style="border-color:' + colors[i % colors.length] + ';color:' + colors[i % colors.length] + '">' + a + '</span>';
-      });
+    container.innerHTML = html;
+  }
+
+  // ---- Level 2: Month Heatmap ----
+  function renderCalendarL2(container) {
+    const { year, month } = calState;
+    const mStr = String(month + 1).padStart(2, '0');
+    const lastDay = new Date(year, month + 1, 0).getDate();
+    const monthStart = `${year}-${mStr}-01`;
+    const monthEnd   = `${year}-${mStr}-${String(lastDay).padStart(2, '0')}`;
+
+    const filtered = filterRecordsByDate(allRecords, monthStart, monthEnd);
+    const dateMap  = buildDateMap(filtered);
+    const values   = Object.values(dateMap);
+    const maxMin   = values.length > 0 ? Math.max(...values) : 0;
+    const totalMin = values.reduce((s, v) => s + v, 0);
+    const daysWithRecords = values.length;
+    const streak = getConsecutiveDays(allRecords);
+
+    // Mon-start offset: JS getDay() 0=Sun -> Mon=0..Sun=6
+    const firstDayJS = new Date(year, month, 1).getDay();
+    const startOffset = firstDayJS === 0 ? 6 : firstDayJS - 1;
+
+    let html = '';
+
+    // Breadcrumb
+    html += '<div class="cal-breadcrumb">';
+    html += `<a onclick="calGoLevel1()">${year}</a>`;
+    html += '<span class="sep">&gt;</span>';
+    html += `<span>${getMonthName(month)}</span>`;
+    html += '</div>';
+
+    // Heatmap grid
+    html += '<div class="cal-heatmap">';
+    for (let d = 0; d < 7; d++) {
+      html += `<div class="day-header">${getDayName(d)}</div>`;
+    }
+    for (let i = 0; i < startOffset; i++) {
+      html += '<div class="cal-day-cell empty" style="visibility:hidden"></div>';
+    }
+    for (let day = 1; day <= lastDay; day++) {
+      const dateStr = `${year}-${mStr}-${String(day).padStart(2, '0')}`;
+      const minutes = dateMap[dateStr] || 0;
+      const intensity = getHeatmapIntensity(minutes, maxMin);
+
+      let cls = 'cal-day-cell';
+      if (minutes > 0) {
+        cls += ' has-data';
+        cls += ` intensity-${intensity}`;
+      } else {
+        cls += ' empty';
+      }
+
+      const onclick = minutes > 0 ? ` onclick="calNavDay(${day})"` : '';
+      const title = minutes > 0 ? ` title="${fmt(minutes)}"` : '';
+
+      html += `<div class="${cls}"${onclick}${title}>${day}</div>`;
+    }
+    html += '</div>';
+
+    if (daysWithRecords === 0) {
+      html += '<div class="cal-no-records">暂无记录</div>';
+    }
+
+    // Stats bar
+    html += '<div class="cal-month-stats">';
+    html += `<div class="stat-item"><span class="stat-label">本月总计</span><span class="stat-value">${fmt(totalMin)}</span></div>`;
+    html += `<div class="stat-item"><span class="stat-label">有记录天数</span><span class="stat-value">${daysWithRecords} 天</span></div>`;
+    html += `<div class="stat-item"><span class="stat-label">连续记录 🔥</span><span class="stat-value">${streak} 天</span></div>`;
+    html += '</div>';
+
+    container.innerHTML = html;
+  }
+
+  // ---- Level 3: Day Detail (doughnut chart + record list) ----
+  function renderCalendarL3(container) {
+    const { year, month, day } = calState;
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+    const dayRecords = allRecords.filter(r => r.date === dateStr);
+    const totalMin = dayRecords.reduce((sum, r) => sum + r.duration_min, 0);
+
+    // Category totals for the doughnut chart
+    const catTotals = {};
+    for (const r of dayRecords) {
+      const cat = r.category || getCategoryForActivity(r.activity, appData.categories);
+      catTotals[cat] = (catTotals[cat] || 0) + r.duration_min;
+    }
+
+    let html = '';
+
+    // Breadcrumb
+    html += '<div class="cal-breadcrumb">';
+    html += `<a onclick="calGoLevel1()">${year}</a>`;
+    html += '<span class="sep">&gt;</span>';
+    html += `<a onclick="calGoLevel2()">${getMonthName(month)}</a>`;
+    html += '<span class="sep">&gt;</span>';
+    html += `<span>${day}日</span>`;
+    html += '</div>';
+
+    // Back button
+    html += '<button class="cal-back-btn" onclick="calGoLevel2()">← 返回月视图</button>';
+
+    html += '<div class="cal-day-detail">';
+
+    // Chart + record list row
+    html += '<div class="cal-detail-row">';
+    html += '<div class="cal-doughnut-wrap"><canvas id="calDoughnutChart"></canvas></div>';
+
+    html += '<div class="cal-record-list">';
+    for (const r of dayRecords) {
+      html += '<div class="cal-record-item">';
+      html += '<div>';
+      html += `<span class="rec-activity">${r.activity}</span>`;
+      html += `<span class="rec-category">${r.category || getCategoryForActivity(r.activity, appData.categories)}</span>`;
       html += '</div>';
+      html += `<span class="rec-duration">${fmt(r.duration_min)}</span>`;
+      html += '</div>';
+    }
+    html += '</div>'; // .cal-record-list
+    html += '</div>'; // .cal-detail-row
 
-      html += '<div class="trend-chart-wrapper"><canvas id="trendCanvas"></canvas></div>';
-      container.innerHTML = html;
+    // Total
+    html += '<div class="cal-day-total">';
+    html += '<div class="total-label">当日总计</div>';
+    html += `<div class="total-value">${fmt(totalMin)}</div>`;
+    html += '</div>';
 
-      var chartInstance = null;
-      var selectedActivities = {};
-      activities.forEach(function(a) { selectedActivities[a] = true; });
+    html += '</div>'; // .cal-day-detail
 
-      function buildChart() {
-        var range = parseInt(document.getElementById('trendRange').value);
-        var endDate = new Date();
-        var startDate = new Date();
-        startDate.setDate(endDate.getDate() - range);
+    container.innerHTML = html;
 
-        // Build date labels
-        var labels = [];
-        var d = new Date(startDate);
-        while (d <= endDate) {
-          labels.push(d.toISOString().slice(0, 10));
-          d.setDate(d.getDate() + 1);
-        }
+    // Render doughnut chart
+    destroyCalChart();
+    renderDoughnutChart(catTotals, totalMin);
+  }
 
-        // Build datasets
-        var datasets = [];
-        activities.forEach(function(activity, i) {
-          if (!selectedActivities[activity]) return;
-          var data = labels.map(function(date) {
-            var dayRecords = records.filter(function(r) { return r.date === date && r.activity === activity; });
-            return dayRecords.reduce(function(s, r) { return s + r.duration_min; }, 0);
-          });
-          datasets.push({
-            label: activity,
-            data: data,
-            borderColor: colors[i % colors.length],
-            backgroundColor: colors[i % colors.length] + '20',
-            tension: 0.3,
-            pointRadius: range <= 30 ? 3 : 0,
-            fill: false
-          });
-        });
+  function renderDoughnutChart(catTotals, totalMin) {
+    const canvas = document.getElementById('calDoughnutChart');
+    if (!canvas) return;
 
-        if (chartInstance) chartInstance.destroy();
+    const colors = getChartColors();
+    const labels = Object.keys(catTotals);
+    const data   = Object.values(catTotals);
 
-        var canvas = document.getElementById('trendCanvas');
-        chartInstance = new Chart(canvas, {
-          type: 'line',
-          data: { labels: labels, datasets: datasets },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: { mode: 'index', intersect: false },
-            scales: {
-              x: {
-                ticks: { color: '#8b949e', maxTicksLimit: 10 },
-                grid: { color: '#21262d' }
-              },
-              y: {
-                ticks: {
-                  color: '#8b949e',
-                  callback: function(v) { return v >= 60 ? Math.floor(v/60) + 'h' : v + 'm'; }
-                },
-                grid: { color: '#21262d' }
+    // Pre-compute percentages for legend labels
+    const percentages = data.map(v =>
+      totalMin > 0 ? ((v / totalMin) * 100).toFixed(1) + '%' : '0%'
+    );
+
+    const style = getComputedStyle(document.documentElement);
+    const textSecondary = style.getPropertyValue('--text-secondary').trim();
+    const bgPrimary      = style.getPropertyValue('--bg-primary').trim();
+
+    calChart = new Chart(canvas, {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: data,
+          backgroundColor: labels.map((_, i) => colors[i % colors.length]),
+          borderColor: bgPrimary,
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        cutout: '60%',
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: textSecondary,
+              padding: 14,
+              font: { size: 12 },
+              generateLabels: function(chart) {
+                const ds = chart.data.datasets[0];
+                return chart.data.labels.map((label, i) => ({
+                  text: `${label}  ${percentages[i]}`,
+                  fillStyle: ds.backgroundColor[i],
+                  strokeStyle: ds.backgroundColor[i],
+                  lineWidth: 0,
+                  hidden: false,
+                  index: i
+                }));
               }
-            },
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                callbacks: {
-                  label: function(ctx) {
-                    var v = ctx.parsed.y;
-                    return ctx.dataset.label + ': ' + (v >= 60 ? Math.floor(v/60) + 'h' + (v%60?v%60+'m':'') : v + 'm');
-                  }
-                }
+            }
+          },
+          tooltip: {
+            backgroundColor: bgPrimary,
+            titleColor: textSecondary,
+            bodyColor: textSecondary,
+            borderColor: style.getPropertyValue('--border').trim(),
+            borderWidth: 1,
+            callbacks: {
+              label: function(ctx) {
+                return ` ${ctx.label}: ${fmt(ctx.raw)} (${percentages[ctx.dataIndex]})`;
               }
             }
           }
-        });
+        }
       }
+    });
+  }
 
-      // Event listeners
-      document.getElementById('trendRange').addEventListener('change', buildChart);
+  // ---- Navigation ----
+  function calNavYear(dir) {
+    calState.year += dir;
+    calState.level = 1;
+    calState.month = new Date().getMonth();
+    calState.day   = null;
+    destroyCalChart();
+    renderCalendarL1(document.getElementById('calendar-view'));
+  }
 
-      container.querySelectorAll('.activity-tag').forEach(function(tag) {
-        tag.addEventListener('click', function() {
-          var act = tag.dataset.activity;
-          if (selectedActivities[act]) {
-            delete selectedActivities[act];
-            tag.classList.remove('active');
+  function calNavMonth(m) {
+    calState.month = m;
+    calState.level = 2;
+    calState.day   = null;
+    destroyCalChart();
+    renderCalendarL2(document.getElementById('calendar-view'));
+  }
+
+  function calNavDay(d) {
+    calState.day   = d;
+    calState.level = 3;
+    destroyCalChart();
+    renderCalendarL3(document.getElementById('calendar-view'));
+  }
+
+  function calGoLevel1() {
+    calState.level = 1;
+    calState.day   = null;
+    destroyCalChart();
+    renderCalendarL1(document.getElementById('calendar-view'));
+  }
+
+  function calGoLevel2() {
+    calState.level = 2;
+    calState.day   = null;
+    destroyCalChart();
+    renderCalendarL2(document.getElementById('calendar-view'));
+  }
+
+  // ---- Main entry: renderCalendar() ----
+  function renderCalendar() {
+    const container = document.getElementById('calendar-view');
+
+    if (!allRecords || allRecords.length === 0) {
+      showEmpty('calendar-view');
+      calInitialized = false;
+      return;
+    }
+
+    // First render: initialise state to current year/month
+    if (!calInitialized) {
+      const now = new Date();
+      calState = {
+        level: 1,
+        year: now.getFullYear(),
+        month: now.getMonth(),
+        day: null
+      };
+      calInitialized = true;
+    }
+
+    destroyCalChart();
+
+    if (calState.level === 1)       renderCalendarL1(container);
+    else if (calState.level === 2)  renderCalendarL2(container);
+    else if (calState.level === 3)  renderCalendarL3(container);
+  }
+
+  // =========================================================================
+  // Trend: Stacked area chart with zoom and category filters
+  // =========================================================================
+  let trendState = null;    // { timeRange: 30, activeCategories: Set, chart: null }
+
+  const TREND_CATEGORY_COLORS = {
+    '学习': '#58a6ff',
+    '生活': '#d29922',
+    '运动': '#3fb950',
+    '娱乐': '#f85149',
+    '工作': '#bc8cff',
+    '其他': '#8b949e'
+  };
+
+  function getTrendCategoryColor(cat) {
+    return TREND_CATEGORY_COLORS[cat] || '#8b949e';
+  }
+
+  function destroyTrendChart() {
+    if (trendState && trendState.chart) {
+      trendState.chart.destroy();
+      trendState.chart = null;
+    }
+  }
+
+  function getTrendDateRange() {
+    const today = new Date();
+    const end = today.toISOString().slice(0, 10);
+    const start = new Date(today);
+    start.setDate(start.getDate() - (trendState?.timeRange || 30) + 1);
+    return { start: start.toISOString().slice(0, 10), end };
+  }
+
+  function getTrendAllCategories() {
+    const cats = Object.keys(appData?.categories || {});
+    const recordCats = new Set((allRecords || []).map(r => r.category).filter(Boolean));
+    recordCats.forEach(c => { if (!cats.includes(c)) cats.push(c); });
+    if (!cats.includes('其他')) cats.push('其他');
+    return cats;
+  }
+
+  function buildTrendDatasets(startDate, endDate) {
+    const activeCats = [...trendState.activeCategories];
+    if (activeCats.length === 0) return { labels: [], datasets: [] };
+
+    // Generate date array
+    const dates = [];
+    const cursor = new Date(startDate + 'T00:00:00');
+    const end = new Date(endDate + 'T00:00:00');
+    while (cursor <= end) {
+      dates.push(cursor.toISOString().slice(0, 10));
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    // Aggregate: date -> { category -> minutes }
+    const filtered = filterRecordsByDate(allRecords, startDate, endDate);
+    const dateMap = {};
+    for (const d of dates) dateMap[d] = {};
+    for (const r of filtered) {
+      const cat = r.category || getCategoryForActivity(r.activity, appData.categories);
+      if (!dateMap[r.date]) dateMap[r.date] = {};
+      dateMap[r.date][cat] = (dateMap[r.date][cat] || 0) + r.duration_min;
+    }
+
+    const datasets = activeCats.map((cat, i) => {
+      const color = getTrendCategoryColor(cat);
+      return {
+        label: cat,
+        data: dates.map(d => dateMap[d]?.[cat] || 0),
+        backgroundColor: color + '33',
+        borderColor: color,
+        borderWidth: 2,
+        fill: i === 0 ? 'origin' : '-1',
+        tension: 0.3,
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: color,
+        pointHoverBorderColor: '#fff',
+        pointHoverBorderWidth: 2
+      };
+    });
+
+    return {
+      labels: dates.map(d => { const p = d.split('-'); return p[1] + '/' + p[2]; }),
+      datasets
+    };
+  }
+
+  function buildTrendHTML(container) {
+    const allCats = getTrendAllCategories();
+    const activeCats = trendState?.activeCategories || new Set(allCats);
+
+    let html = '<div class="trend-container">';
+
+    // Controls row
+    html += '<div class="trend-controls">';
+
+    // Category filters
+    html += '<div class="trend-filters" id="trendFilters">';
+    for (const cat of allCats) {
+      const isActive = activeCats.has(cat);
+      const color = getTrendCategoryColor(cat);
+      html += '<span class="trend-filter-tag' + (isActive ? ' active' : '') + '" data-cat="' + cat + '"';
+      if (isActive) html += ' style="color:' + color + ';border-color:' + color + '"';
+      html += '><span class="tag-dot" style="background:' + color + '"></span>' + cat + '</span>';
+    }
+    html += '</div>';
+
+    // Time range buttons
+    html += '<div class="trend-time-range" id="trendTimeRange">';
+    ['7', '30', '90'].forEach(days => {
+      const isActive = (trendState?.timeRange || 30) === parseInt(days);
+      html += '<button class="trend-time-btn' + (isActive ? ' active' : '') + '" data-days="' + days + '">' + days + '天</button>';
+    });
+    html += '</div>';
+
+    html += '</div>'; // .trend-controls
+
+    // Chart wrapper
+    html += '<div class="trend-chart-wrap"><canvas id="trendChart"></canvas></div>';
+
+    html += '</div>'; // .trend-container
+
+    container.innerHTML = html;
+
+    // Bind events after DOM is inserted
+    bindTrendEvents();
+  }
+
+  function bindTrendEvents() {
+    const filterContainer = document.getElementById('trendFilters');
+    if (filterContainer) {
+      filterContainer.querySelectorAll('.trend-filter-tag').forEach(tag => {
+        tag.addEventListener('click', () => {
+          const cat = tag.dataset.cat;
+          if (trendState.activeCategories.has(cat)) {
+            trendState.activeCategories.delete(cat);
           } else {
-            selectedActivities[act] = true;
-            tag.classList.add('active');
+            trendState.activeCategories.add(cat);
           }
-          buildChart();
+          renderTrend();
         });
       });
-
-      buildChart();
-    }
-    function renderReport() {
-      var container = document.getElementById('report');
-      var records = allData.records;
-
-      var barColors = ['#58a6ff','#3fb950','#d29922','#f85149','#bc8cff','#39d353','#db61a2','#79c0ff'];
-
-      var currentRange = 'week';
-
-      function getDateRange(range) {
-        var now = new Date();
-        var start = new Date();
-        if (range === 'week') start.setDate(now.getDate() - 7);
-        else if (range === 'month') start.setMonth(now.getMonth() - 1);
-        else start.setFullYear(now.getFullYear() - 1);
-        return { start: start, end: now };
-      }
-
-      function getPreviousRange(range) {
-        var now = new Date();
-        var end = new Date();
-        var start = new Date();
-        if (range === 'week') {
-          start.setDate(now.getDate() - 14);
-          end.setDate(now.getDate() - 7);
-        } else if (range === 'month') {
-          start.setMonth(now.getMonth() - 2);
-          end.setMonth(now.getMonth() - 1);
-        } else {
-          start.setFullYear(now.getFullYear() - 2);
-          end.setFullYear(now.getFullYear() - 1);
-        }
-        return { start: start, end: end };
-      }
-
-      function filterRecords(start, end) {
-        var s = start.toISOString().slice(0,10);
-        var e = end.toISOString().slice(0,10);
-        return records.filter(function(r) { return r.date >= s && r.date <= e; });
-      }
-
-      function buildReport(range) {
-        var dateRange = getDateRange(range);
-        var prevRange = getPreviousRange(range);
-
-        var current = filterRecords(dateRange.start, dateRange.end);
-        var previous = filterRecords(prevRange.start, prevRange.end);
-
-        // Aggregate by activity
-        var activityTotals = {};
-        current.forEach(function(r) {
-          activityTotals[r.activity] = (activityTotals[r.activity] || 0) + r.duration_min;
-        });
-
-        var prevTotals = {};
-        previous.forEach(function(r) {
-          prevTotals[r.activity] = (prevTotals[r.activity] || 0) + r.duration_min;
-        });
-
-        // Sort by duration desc
-        var sorted = Object.keys(activityTotals).map(function(k) {
-          return [k, activityTotals[k]];
-        }).sort(function(a, b) { return b[1] - a[1]; });
-
-        var totalMin = sorted.reduce(function(s, item) { return s + item[1]; }, 0);
-        var prevTotal = Object.keys(prevTotals).reduce(function(s, k) { return s + prevTotals[k]; }, 0);
-
-        var maxMin = sorted.length > 0 ? sorted[0][1] : 1;
-
-        var rangeLabels = { week: '本周', month: '本月', year: '本年' };
-        var periodLabel = rangeLabels[range];
-
-        // Format helpers
-        function fmt(min) {
-          if (min >= 60) {
-            var h = Math.floor(min / 60);
-            var m = min % 60;
-            return m ? h + 'h' + m + 'm' : h + 'h';
-          }
-          return min + 'm';
-        }
-
-        function changeText(cur, prev) {
-          if (prev === 0) return cur > 0 ? '<span class="change-up">新增</span>' : '<span class="change-same">—</span>';
-          var diff = cur - prev;
-          var pct = Math.round(Math.abs(diff) / prev * 100);
-          if (diff > 0) return '<span class="change-up">+' + fmt(diff) + ' (↑' + pct + '%)</span>';
-          if (diff < 0) return '<span class="change-down">' + fmt(diff) + ' (↓' + pct + '%)</span>';
-          return '<span class="change-same">持平</span>';
-        }
-
-        var html = '<div class="report-range-controls">';
-        ['week','month','year'].forEach(function(r) {
-          html += '<button class="' + (r === range ? 'active' : '') + '" data-range="' + r + '">' + rangeLabels[r] + '</button>';
-        });
-        html += '</div>';
-
-        html += '<div class="report-content">';
-
-        // Summary section
-        html += '<div class="report-section"><h3>' + periodLabel + '总览</h3>';
-        html += '<div class="report-stat"><span class="label">总投入时间</span><span class="value">' + fmt(totalMin) + '</span></div>';
-        html += '<div class="report-stat"><span class="label">记录条数</span><span class="value">' + current.length + ' 条</span></div>';
-        html += '<div class="report-stat"><span class="label">活动种类</span><span class="value">' + sorted.length + ' 种</span></div>';
-        html += '<div class="report-stat"><span class="label">与上个周期对比</span><span class="value">' + changeText(totalMin, prevTotal) + '</span></div>';
-        html += '</div>';
-
-        // Activity breakdown
-        html += '<div class="report-section"><h3>活动排行</h3>';
-        sorted.forEach(function(item, i) {
-          var activity = item[0];
-          var min = item[1];
-          var pct = Math.round(min / totalMin * 100);
-          var barWidth = Math.round(min / maxMin * 100);
-          var prevMin = prevTotals[activity] || 0;
-          html += '<div class="report-bar">';
-          html += '<span class="bar-label">' + activity + '</span>';
-          html += '<div class="bar-track"><div class="bar-fill" style="width:' + barWidth + '%;background:' + barColors[i % barColors.length] + '"></div></div>';
-          html += '<span class="bar-value">' + fmt(min) + ' (' + pct + '%)</span>';
-          html += '</div>';
-          html += '<div class="report-stat" style="padding:2px 0 8px 88px;font-size:12px"><span class="label">环比</span>' + changeText(min, prevMin) + '</div>';
-        });
-        html += '</div>';
-
-        // Top item
-        if (sorted.length > 0) {
-          html += '<div class="report-section"><h3>洞察</h3>';
-          var topAct = sorted[0][0];
-          var topMin = sorted[0][1];
-          var topPct = Math.round(topMin / totalMin * 100);
-          html += '<div class="report-stat"><span class="label">最大时间消耗</span><span class="value">' + topAct + '（' + fmt(topMin) + '，占' + topPct + '%）</span></div>';
-
-          if (sorted.length >= 2) {
-            var secondMin = sorted[1][1];
-            var gap = topMin - secondMin;
-            html += '<div class="report-stat"><span class="label">第一与第二差距</span><span class="value">' + fmt(gap) + '</span></div>';
-          }
-
-          // Average per day
-          var dayCount = Math.max(1, Math.ceil((dateRange.end - dateRange.start) / (1000 * 60 * 60 * 24)));
-          html += '<div class="report-stat"><span class="label">日均投入</span><span class="value">' + fmt(Math.round(totalMin / dayCount)) + '</span></div>';
-          html += '</div>';
-        }
-
-        html += '</div>';
-        container.innerHTML = html;
-
-        // Range button events
-        container.querySelectorAll('.report-range-controls button').forEach(function(btn) {
-          btn.addEventListener('click', function() {
-            currentRange = btn.dataset.range;
-            buildReport(currentRange);
-          });
-        });
-      }
-
-      buildReport(currentRange);
     }
 
-    loadData();
+    const rangeContainer = document.getElementById('trendTimeRange');
+    if (rangeContainer) {
+      rangeContainer.querySelectorAll('.trend-time-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          trendState.timeRange = parseInt(btn.dataset.days);
+          renderTrend();
+        });
+      });
+    }
+  }
+
+  function createTrendChart(startDate, endDate) {
+    const canvas = document.getElementById('trendChart');
+    if (!canvas) return;
+
+    const { labels, datasets } = buildTrendDatasets(startDate, endDate);
+
+    if (datasets.length === 0) {
+      // All categories filtered out
+      const wrap = canvas.parentElement;
+      wrap.innerHTML = '<div class="trend-no-data">没有选中任何分类，请点击上方标签开启</div>';
+      return;
+    }
+
+    if (labels.length === 0) {
+      return;
+    }
+
+    const style = getComputedStyle(document.documentElement);
+    const textSecondary = style.getPropertyValue('--text-secondary').trim();
+    const textMuted = style.getPropertyValue('--text-muted').trim();
+    const border = style.getPropertyValue('--border').trim();
+    const bgPrimary = style.getPropertyValue('--bg-primary').trim();
+
+    trendState.chart = new Chart(canvas, {
+      type: 'line',
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: bgPrimary,
+            titleColor: textSecondary,
+            bodyColor: textSecondary,
+            borderColor: border,
+            borderWidth: 1,
+            padding: 12,
+            callbacks: {
+              title: function(ctx) {
+                const labelIdx = ctx[0].dataIndex;
+                const d = new Date(startDate + 'T00:00:00');
+                d.setDate(d.getDate() + labelIdx);
+                return d.toISOString().slice(0, 10);
+              },
+              label: function(ctx) {
+                const val = ctx.raw;
+                const total = ctx.chart.data.datasets.reduce((sum, ds) => sum + (ds.data[ctx.dataIndex] || 0), 0);
+                const pct = total > 0 ? ((val / total) * 100).toFixed(1) : '0';
+                return ' ' + ctx.dataset.label + ': ' + fmt(val) + ' (' + pct + '%)';
+              },
+              footer: function(ctx) {
+                const total = ctx.reduce((sum, item) => sum + (item.raw || 0), 0);
+                return '总计: ' + fmt(total);
+              }
+            }
+          },
+          zoom: {
+            pan: {
+              enabled: true,
+              mode: 'x'
+            },
+            zoom: {
+              wheel: {
+                enabled: true
+              },
+              pinch: {
+                enabled: true
+              },
+              mode: 'x'
+            }
+          }
+        },
+        scales: {
+          x: {
+            stacked: true,
+            grid: {
+              color: border,
+              drawBorder: false
+            },
+            ticks: {
+              color: textMuted,
+              maxTicksLimit: 10,
+              font: { size: 11 }
+            }
+          },
+          y: {
+            stacked: true,
+            grid: {
+              color: border,
+              drawBorder: false
+            },
+            ticks: {
+              color: textMuted,
+              font: { size: 11 },
+              callback: function(value) {
+                if (value >= 60) {
+                  const h = Math.floor(value / 60);
+                  const m = value % 60;
+                  return m > 0 ? h + 'h' + m + 'm' : h + 'h';
+                }
+                return value + 'm';
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  function renderTrend() {
+    const container = document.getElementById('trend-view');
+
+    if (!allRecords || allRecords.length === 0) {
+      showEmpty('trend-view');
+      return;
+    }
+
+    // Initialize state on first render
+    if (!trendState) {
+      const allCats = getTrendAllCategories();
+      trendState = {
+        timeRange: 30,
+        activeCategories: new Set(allCats),
+        chart: null
+      };
+    }
+
+    destroyTrendChart();
+
+    const { start, end } = getTrendDateRange();
+
+    buildTrendHTML(container);
+    createTrendChart(start, end);
+  }
+
+
+  // =========================================================================
+  // Report: Enhanced analysis report with doughnut, insights, ranking
+  // =========================================================================
+  let reportState = { range: 'week', chart: null };
+
+  const REPORT_CATEGORY_COLORS = {
+    '学习': '#58a6ff',
+    '生活': '#d29922',
+    '运动': '#3fb950',
+    '娱乐': '#f85149',
+    '工作': '#bc8cff',
+    '其他': '#8b949e'
+  };
+
+  function getReportCategoryColor(cat) {
+    return REPORT_CATEGORY_COLORS[cat] || '#8b949e';
+  }
+
+  function destroyReportChart() {
+    if (reportState.chart) {
+      reportState.chart.destroy();
+      reportState.chart = null;
+    }
+  }
+
+  // ---- Date string helper (local time, YYYY-MM-DD) ----
+
+  function toDateStr(date) {
+    var y = date.getFullYear();
+    var m = String(date.getMonth() + 1).padStart(2, '0');
+    var d = String(date.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + d;
+  }
+
+  // ---- Date range helpers ----
+
+  function getReportDateRange() {
+    var today = new Date();
+
+    if (reportState.range === 'week') {
+      var dayOfWeek = today.getDay();
+      var mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      var monday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - mondayOffset);
+      return {
+        start: toDateStr(monday),
+        end: toDateStr(today)
+      };
+    } else if (reportState.range === 'month') {
+      var firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+      return {
+        start: toDateStr(firstDay),
+        end: toDateStr(today)
+      };
+    } else {
+      // year
+      var firstDay = new Date(today.getFullYear(), 0, 1);
+      return {
+        start: toDateStr(firstDay),
+        end: toDateStr(today)
+      };
+    }
+  }
+
+  function getPreviousPeriodRange(currentStart, currentEnd) {
+    var parts = currentStart.split('-');
+    var startDate = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+    var partsE = currentEnd.split('-');
+    var endDate = new Date(+partsE[0], +partsE[1] - 1, +partsE[2]);
+    var days = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+    var prevEnd = new Date(startDate.getTime() - 24 * 60 * 60 * 1000);
+    var prevStart = new Date(prevEnd.getTime() - (days - 1) * 24 * 60 * 60 * 1000);
+    return {
+      start: toDateStr(prevStart),
+      end: toDateStr(prevEnd)
+    };
+  }
+
+  // ---- Doughnut center-text plugin ----
+
+  const reportCenterTextPlugin = {
+    id: 'reportCenterText',
+    afterDraw(chart) {
+      const { ctx, chartArea: { top, bottom, left, right } } = chart;
+      const centerX = (left + right) / 2;
+      const centerY = (top + bottom) / 2;
+      const text = chart.config._centerText || '';
+      if (!text) return;
+
+      const style = getComputedStyle(document.documentElement);
+      ctx.save();
+      ctx.font = 'bold 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillStyle = style.getPropertyValue('--text-primary').trim();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, centerX, centerY - 4);
+      ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillStyle = style.getPropertyValue('--text-muted').trim();
+      ctx.fillText('总计', centerX, centerY + 20);
+      ctx.restore();
+    }
+  };
+
+  // ---- Insights engine ----
+
+  function generateInsights(currTotals, prevTotals, currTotal, prevTotal, streak) {
+    const candidates = [];
+
+    // 1. Streak
+    if (streak >= 3) {
+      candidates.push({ priority: 0, text: '\u{1F4A1} 连续 ' + streak + ' 天有记录，保持节奏' });
+    }
+
+    if (prevTotal > 0 && currTotal > 0) {
+      var currPcts = {}, prevPcts = {};
+      var allCats = new Set();
+      Object.keys(currTotals).forEach(function(c) { allCats.add(c); });
+      Object.keys(prevTotals).forEach(function(c) { allCats.add(c); });
+      allCats.forEach(function(cat) {
+        currPcts[cat] = ((currTotals[cat] || 0) / currTotal) * 100;
+        prevPcts[cat] = ((prevTotals[cat] || 0) / prevTotal) * 100;
+      });
+
+      // 2. Entertainment jump (>= 10pp)
+      var entCurr = currPcts['娱乐'] || 0;
+      var entPrev = prevPcts['娱乐'] || 0;
+      if (entCurr - entPrev >= 10) {
+        candidates.push({
+          priority: 1,
+          text: '\u{1F4A1} 娱乐占比从 ' + entPrev.toFixed(0) + '% 上升到 ' + entCurr.toFixed(0) + '%，注意时间分配'
+        });
+      }
+
+      // Collect all significant changes (>= 5pp absolute)
+      var changes = [];
+      allCats.forEach(function(cat) {
+        if (cat === '娱乐' && entCurr - entPrev >= 10) return; // already warned
+        var diff = currPcts[cat] - prevPcts[cat];
+        if (Math.abs(diff) >= 5) {
+          changes.push({ cat: cat, diffAbs: Math.abs(diff), up: diff > 0, currPct: currPcts[cat], prevPct: prevPcts[cat] });
+        }
+      });
+      changes.sort(function(a, b) { return b.diffAbs - a.diffAbs; });
+
+      // 3. Biggest dimension shift
+      if (changes.length > 0) {
+        var biggest = changes[0];
+        var dir = biggest.up ? '增加' : '减少';
+        candidates.push({
+          priority: 2,
+          text: '\u{1F4A1} 与上个周期对比，' + biggest.cat + '维度变化最大（' + dir + ' ' + biggest.diffAbs.toFixed(0) + ' 个百分点）'
+        });
+      }
+
+      // 4. Other category changes (backfill)
+      var startIdx = changes.length > 0 ? 1 : 0;
+      for (var i = startIdx; i < changes.length; i++) {
+        var c = changes[i];
+        var cdir = c.up ? '上升' : '下降';
+        candidates.push({
+          priority: 3,
+          text: '\u{1F4A1} ' + c.cat + '占比从 ' + c.prevPct.toFixed(0) + '% ' + cdir + '到 ' + c.currPct.toFixed(0) + '%'
+        });
+      }
+    }
+
+    candidates.sort(function(a, b) { return a.priority - b.priority; });
+    return candidates.slice(0, 3);
+  }
+
+  // ---- Render: Doughnut chart ----
+
+  function renderReportDoughnut(catTotals, totalMin, prevCatTotals, prevTotalMin) {
+    var canvas = document.getElementById('reportDoughnutChart');
+    if (!canvas) return;
+
+    destroyReportChart();
+
+    var allCats = new Set();
+    Object.keys(catTotals).forEach(function(c) { allCats.add(c); });
+    Object.keys(prevCatTotals).forEach(function(c) { allCats.add(c); });
+    var sortedCats = Array.from(allCats).sort(function(a, b) {
+      return (catTotals[b] || 0) - (catTotals[a] || 0);
+    });
+
+    if (sortedCats.length === 0) return;
+
+    var data = sortedCats.map(function(c) { return catTotals[c] || 0; });
+    var colors = sortedCats.map(function(c) { return getReportCategoryColor(c); });
+
+    var style = getComputedStyle(document.documentElement);
+    var textSecondary = style.getPropertyValue('--text-secondary').trim();
+    var bgPrimary = style.getPropertyValue('--bg-primary').trim();
+
+    // Compute percentages and trend arrows
+    var percentages = data.map(function(v) {
+      return totalMin > 0 ? ((v / totalMin) * 100).toFixed(1) + '%' : '0%';
+    });
+
+    var totalPct = totalMin > 0 ? ((totalMin / totalMin) * 100).toFixed(0) : '0';
+
+    reportState.chart = new Chart(canvas, {
+      type: 'doughnut',
+      data: {
+        labels: sortedCats,
+        datasets: [{
+          data: data,
+          backgroundColor: colors,
+          borderColor: bgPrimary,
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        cutout: '62%',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: bgPrimary,
+            titleColor: textSecondary,
+            bodyColor: textSecondary,
+            borderColor: style.getPropertyValue('--border').trim(),
+            borderWidth: 1,
+            callbacks: {
+              label: function(ctx) {
+                var pct = totalMin > 0 ? ((ctx.raw / totalMin) * 100).toFixed(1) : '0';
+                return ' ' + ctx.label + ': ' + fmt(ctx.raw) + ' (' + pct + '%)';
+              }
+            }
+          }
+        }
+      },
+      plugins: [reportCenterTextPlugin]
+    });
+
+    // Store center text for the plugin
+    reportState.chart.config._centerText = fmt(totalMin);
+
+    // Build custom HTML legend with trend arrows
+    var legendEl = document.getElementById('reportChartLegend');
+    if (!legendEl) return;
+
+    var html = '';
+    for (var i = 0; i < sortedCats.length; i++) {
+      var cat = sortedCats[i];
+      var pctVal = totalMin > 0 ? ((catTotals[cat] || 0) / totalMin * 100) : 0;
+      var prevPctVal = prevTotalMin > 0 ? ((prevCatTotals[cat] || 0) / prevTotalMin * 100) : 0;
+      var diff = pctVal - prevPctVal;
+
+      var trendHtml;
+      if (prevTotalMin === 0) {
+        trendHtml = '<span class="report-legend-trend flat">--</span>';
+      } else if (diff > 0.5) {
+        trendHtml = '<span class="report-legend-trend up">↑ ' + diff.toFixed(1) + '%</span>';
+      } else if (diff < -0.5) {
+        trendHtml = '<span class="report-legend-trend down">↓ ' + Math.abs(diff).toFixed(1) + '%</span>';
+      } else {
+        trendHtml = '<span class="report-legend-trend flat">→</span>';
+      }
+
+      html += '<div class="report-legend-item">';
+      html += '<span class="report-legend-dot" style="background:' + colors[i] + '"></span>';
+      html += '<span class="report-legend-name">' + cat + '</span>';
+      html += '<span class="report-legend-pct">' + pctVal.toFixed(1) + '%</span>';
+      html += trendHtml;
+      html += '</div>';
+    }
+    legendEl.innerHTML = html;
+  }
+
+  // ---- Render: main entry ----
+
+  function renderReport() {
+    var container = document.getElementById('report-view');
+
+    if (!allRecords || allRecords.length === 0) {
+      showEmpty('report-view');
+      return;
+    }
+
+    destroyReportChart();
+
+    var range = getReportDateRange();
+    var prev = getPreviousPeriodRange(range.start, range.end);
+
+    // Calculate metrics
+    var currRecords = filterRecordsByDate(allRecords, range.start, range.end);
+    var totalMin = currRecords.reduce(function(s, r) { return s + r.duration_min; }, 0);
+    var startParts = range.start.split('-');
+    var endParts = range.end.split('-');
+    var dayCount = Math.round((new Date(+endParts[0], +endParts[1] - 1, +endParts[2]) - new Date(+startParts[0], +startParts[1] - 1, +startParts[2])) / (1000 * 60 * 60 * 24)) + 1;
+    var dailyAvgMin = dayCount > 0 ? Math.round(totalMin / dayCount) : 0;
+    var streak = getConsecutiveDays(allRecords);
+
+    var catTotals = getCategoryTotals(allRecords, appData.categories, range.start, range.end);
+    var prevCatTotals = getCategoryTotals(allRecords, appData.categories, prev.start, prev.end);
+    var prevTotalMin = 0;
+    for (var k in prevCatTotals) { prevTotalMin += prevCatTotals[k]; }
+
+    // Activity totals for ranking
+    var activityTotals = getActivityTotals(allRecords, range.start, range.end);
+
+    // Generate insights
+    var insights = generateInsights(catTotals, prevCatTotals, totalMin, prevTotalMin, streak);
+
+    // Range labels
+    var rangeLabels = { week: '本周', month: '本月', year: '本年' };
+    var rangeLabel = rangeLabels[reportState.range] || '本周';
+
+    // ---- Build HTML ----
+    var html = '';
+
+    // Time range selector
+    html += '<div class="report-time-range" id="reportTimeRange">';
+    ['week', 'month', 'year'].forEach(function(key) {
+      var isActive = reportState.range === key;
+      html += '<button class="report-time-btn' + (isActive ? ' active' : '') + '" data-range="' + key + '">' + rangeLabels[key] + '</button>';
+    });
+    html += '</div>';
+
+    if (totalMin === 0) {
+      html += '<div class="report-empty">' + rangeLabel + '暂无记录</div>';
+      container.innerHTML = html;
+      bindReportEvents();
+      return;
+    }
+
+    // Overview cards
+    html += '<div class="report-overview">';
+    html += '<div class="report-overview-card">';
+    html += '<div class="card-label">总投入</div>';
+    html += '<div class="card-value">' + fmt(totalMin) + '</div>';
+    html += '</div>';
+    html += '<div class="report-overview-card">';
+    html += '<div class="card-label">日均投入</div>';
+    html += '<div class="card-value">' + fmt(dailyAvgMin) + '</div>';
+    html += '<div class="card-sub">共 ' + dayCount + ' 天</div>';
+    html += '</div>';
+    html += '<div class="report-overview-card">';
+    html += '<div class="card-label">连续记录</div>';
+    html += '<div class="card-value">' + streak + '天 \u{1F525}</div>';
+    html += '</div>';
+    html += '</div>';
+
+    // Chart section: doughnut + legend
+    html += '<div class="report-chart-section">';
+    html += '<div class="report-chart-wrap"><canvas id="reportDoughnutChart"></canvas></div>';
+    html += '<div class="report-chart-legend" id="reportChartLegend"></div>';
+    html += '</div>';
+
+    // Text summary of time allocation
+    var summaryParts = [];
+    var sortedCatsForSummary = Object.keys(catTotals).sort(function(a, b) {
+      return (catTotals[b] || 0) - (catTotals[a] || 0);
+    });
+    sortedCatsForSummary.forEach(function(cat) {
+      var min = catTotals[cat] || 0;
+      if (min > 0) {
+        var pct = totalMin > 0 ? (min / totalMin * 100).toFixed(0) : '0';
+        summaryParts.push(cat + ' ' + fmt(min) + '（' + pct + '%）');
+      }
+    });
+    if (summaryParts.length > 0) {
+      html += '<div class="report-summary">';
+      html += '<div class="report-summary-title">' + rangeLabel + '时间分配</div>';
+      html += '<div class="report-summary-text">' + summaryParts.join('，') + '</div>';
+      html += '</div>';
+    }
+
+    // Insights
+    if (insights.length > 0) {
+      html += '<div class="report-insights">';
+      insights.forEach(function(item) {
+        html += '<div class="report-insight-card">' + item.text + '</div>';
+      });
+      html += '</div>';
+    }
+
+    // Activity ranking
+    var entries = [];
+    for (var act in activityTotals) {
+      entries.push({ name: act, minutes: activityTotals[act], cat: getCategoryForActivity(act, appData.categories) });
+    }
+    entries.sort(function(a, b) { return b.minutes - a.minutes; });
+
+    var topEntries = entries.slice(0, 8);
+    var restEntries = entries.slice(8);
+    var restTotal = restEntries.reduce(function(s, e) { return s + e.minutes; }, 0);
+
+    var rankingList = topEntries.slice();
+    if (restEntries.length > 0) {
+      rankingList.push({ name: '其他 (' + restEntries.length + '项)', minutes: restTotal, cat: '其他' });
+    }
+
+    var maxMin = rankingList.length > 0 ? Math.max.apply(null, rankingList.map(function(e) { return e.minutes; })) : 1;
+
+    if (rankingList.length > 0) {
+      html += '<div class="report-ranking-title">活动排行</div>';
+      rankingList.forEach(function(entry) {
+        var barPct = maxMin > 0 ? (entry.minutes / maxMin * 100) : 0;
+        var sharePct = totalMin > 0 ? (entry.minutes / totalMin * 100) : 0;
+        var color = getReportCategoryColor(entry.cat);
+        html += '<div class="report-rank-item">';
+        html += '<span class="report-rank-label" title="' + entry.name + '">' + entry.name + '</span>';
+        html += '<div class="report-rank-bar-wrap"><div class="report-rank-bar" style="width:' + barPct + '%;background:' + color + '"></div></div>';
+        html += '<span class="report-rank-duration">' + fmt(entry.minutes) + '</span>';
+        html += '<span class="report-rank-pct">' + sharePct.toFixed(1) + '%</span>';
+        html += '</div>';
+      });
+    }
+
+    container.innerHTML = html;
+
+    // Render chart after DOM insertion
+    renderReportDoughnut(catTotals, totalMin, prevCatTotals, prevTotalMin);
+
+    // Bind events
+    bindReportEvents();
+  }
+
+  function bindReportEvents() {
+    var rangeEl = document.getElementById('reportTimeRange');
+    if (!rangeEl) return;
+    rangeEl.querySelectorAll('.report-time-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        reportState.range = btn.dataset.range;
+        renderReport();
+      });
+    });
+  }
+
+  // =========================================================================
+  // Init
+  // =========================================================================
+  function init() {
+    Theme.init();
+    initTabs();
+
+    const toggleBtn = document.getElementById('themeToggle');
+    toggleBtn.addEventListener('click', () => Theme.toggle());
+
+    loadData().then(() => {
+      renderAll();
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
 </html>

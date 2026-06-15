@@ -1,0 +1,87 @@
+<!--
+  stat-card 组件 — 统计卡片
+  展示时间统计摘要，含环形图、关键指标、类别占比
+  约束：min-height = width/4, max-height = width/1
+  交互：仅支持 tap 事件
+-->
+
+<view class="stat-card" bindtap="onCardTap">
+  <!-- 标题栏 -->
+  <view class="card-header">
+    <text class="card-title">{{label}}</text>
+  </view>
+
+  <!-- 环形图 + 指标区 -->
+  <view class="card-body">
+    <!-- 环形图 -->
+    <view class="ring-section">
+      <canvas
+        type="2d"
+        id="ring-canvas"
+        class="ring-canvas"
+        style="width: {{ringSize}}px; height: {{ringSize}}px;"
+      ></canvas>
+      <view class="ring-center">
+        <text class="ring-total-value">{{totalHours}}h</text>
+        <text class="ring-total-label">总投入</text>
+      </view>
+    </view>
+
+    <!-- 指标列 -->
+    <view class="metrics-section">
+      <view class="metric-item">
+        <text class="metric-value">{{dailyAvg}}</text>
+        <text class="metric-label">日均</text>
+      </view>
+      <view class="metric-item">
+        <text class="metric-value">{{recordCount}}</text>
+        <text class="metric-label">条记录</text>
+      </view>
+      <view class="metric-item">
+        <text class="metric-value">{{streakDays}}天</text>
+        <text class="metric-label">连续记录</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 类别占比图例 -->
+  <view class="category-legend">
+    <view
+      class="legend-item"
+      wx:for="{{categoryBreakdown}}"
+      wx:key="category"
+    >
+      <view class="legend-dot" style="background-color: {{item.color}};"></view>
+      <text class="legend-category">{{item.category}}</text>
+      <text class="legend-percent">{{item.percentage}}%</text>
+      <text class="legend-time">{{item.displayTime}}</text>
+    </view>
+  </view>
+
+  <!-- 洞察 -->
+  <view class="insights-section" wx:if="{{insights.length > 0}}">
+    <view
+      class="insight-item"
+      wx:for="{{insights}}"
+      wx:key="index"
+    >
+      <text class="insight-icon">{{insightIcons[item.type]}}</text>
+      <text class="insight-text">{{item.text}}</text>
+    </view>
+  </view>
+
+  <!-- 顶部活动 -->
+  <view class="top-activities" wx:if="{{topActivities.length > 0}}">
+    <text class="section-label">活动排名</text>
+    <view
+      class="activity-item"
+      wx:for="{{topActivities}}"
+      wx:key="activity"
+    >
+      <text class="activity-rank">{{index + 1}}</text>
+      <text class="activity-name">{{item.activity}}</text>
+      <text class="activity-time">{{item.displayTime}}</text>
+      <text class="activity-pct">{{item.percentage}}%</text>
+    </view>
+  </view>
+</view>

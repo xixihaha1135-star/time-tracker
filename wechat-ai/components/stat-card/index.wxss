@@ -1,0 +1,241 @@
+/**
+ * stat-card 组件样式
+ * 遵循微信设计规范，卡片式布局
+ * 约束：min-height = 100rpx (width/4 at 400rpx), max-height = 400rpx (width/1)
+ */
+
+/* 卡片容器 */
+.stat-card {
+  background-color: #ffffff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin: 16rpx 0;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+  min-height: 100rpx;
+  max-height: 800rpx;
+  overflow-y: auto;
+}
+
+/* 标题栏 */
+.card-header {
+  margin-bottom: 20rpx;
+}
+
+.card-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+/* 主体：环形图 + 指标 */
+.card-body {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.ring-section {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ring-canvas {
+  display: block;
+}
+
+.ring-center {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.ring-total-value {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.2;
+}
+
+.ring-total-label {
+  font-size: 22rpx;
+  color: #8e8e93;
+  margin-top: 4rpx;
+}
+
+/* 指标列 */
+.metrics-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  padding-left: 32rpx;
+}
+
+.metric-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-value {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+  line-height: 1.2;
+}
+
+.metric-label {
+  font-size: 22rpx;
+  color: #8e8e93;
+  margin-top: 2rpx;
+}
+
+/* 类别图例 */
+.category-legend {
+  border-top: 1rpx solid #f0f0f0;
+  padding-top: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.legend-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 8rpx 0;
+}
+
+.legend-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.legend-category {
+  flex: 1;
+  font-size: 26rpx;
+  color: #333333;
+}
+
+.legend-percent {
+  font-size: 26rpx;
+  color: #666666;
+  margin-right: 20rpx;
+  width: 72rpx;
+  text-align: right;
+}
+
+.legend-time {
+  font-size: 24rpx;
+  color: #8e8e93;
+  width: 100rpx;
+  text-align: right;
+}
+
+/* 洞察 */
+.insights-section {
+  background-color: #f8f9fa;
+  border-radius: 12rpx;
+  padding: 16rpx 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.insight-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 6rpx 0;
+}
+
+.insight-icon {
+  font-size: 24rpx;
+  margin-right: 8rpx;
+  flex-shrink: 0;
+}
+
+.insight-text {
+  font-size: 24rpx;
+  color: #555555;
+  line-height: 1.4;
+}
+
+/* 顶部活动 */
+.top-activities {
+  border-top: 1rpx solid #f0f0f0;
+  padding-top: 20rpx;
+}
+
+.section-label {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #666666;
+  margin-bottom: 12rpx;
+  display: block;
+}
+
+.activity-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 8rpx 0;
+}
+
+.activity-rank {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  text-align: center;
+  line-height: 36rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #666666;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.activity-item:first-child .activity-rank {
+  background-color: #FFD700;
+  color: #fff;
+}
+
+.activity-item:nth-child(2) .activity-rank {
+  background-color: #C0C0C0;
+  color: #fff;
+}
+
+.activity-item:nth-child(3) .activity-rank {
+  background-color: #CD7F32;
+  color: #fff;
+}
+
+.activity-name {
+  flex: 1;
+  font-size: 26rpx;
+  color: #333333;
+}
+
+.activity-time {
+  font-size: 24rpx;
+  color: #666666;
+  margin-right: 16rpx;
+  width: 100rpx;
+  text-align: right;
+}
+
+.activity-pct {
+  font-size: 24rpx;
+  color: #8e8e93;
+  width: 60rpx;
+  text-align: right;
+}

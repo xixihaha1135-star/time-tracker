@@ -21,6 +21,7 @@
 - **双主题一键切换** — 暗色 GitHub 风格（护眼） / 亮色 Apple Health 风格（清爽），适应不同使用场景
 - **数据全归你** — 所有记录存在单个 `records.json` 文件里，换电脑、换平台、换 Agent，复制粘贴即可带走
 - **多平台通用** — 同一份 SKILL.md 同时支持 Claude Code / Cursor / 扣子（Coze）/ 飞书 / 通用 AI Agent
+- **日记级细节记录** — 记录时自动提取具体细节（书名、游戏名等），回看时能想起当时在做什么
 
 ---
 
@@ -36,9 +37,10 @@ git clone https://github.com/xixihaha1135-star/time-tracker.git
 mkdir -p 你的项目/.claude/skills/time-tracker
 cp time-tracker/SKILL.md 你的项目/.claude/skills/time-tracker/
 
-# 3. 把可视化页面和数据文件也复制过去
+# 3. 把可视化页面复制过去
 cp time-tracker/index.html 你的项目/.claude/skills/time-tracker/
-cp time-tracker/records.json 你的项目/.claude/skills/time-tracker/
+
+# records.json 会在你第一次记录时间时自动创建，无需手动复制
 ```
 
 安装后，对 Claude Code 直接说：
@@ -51,13 +53,14 @@ cp time-tracker/records.json 你的项目/.claude/skills/time-tracker/
 
 1. 打开 `SKILL.md`，复制全部内容
 2. 粘贴到你的 `.cursorrules`、`copilot-instructions.md` 或项目的 agent 指令文件中
-3. 将 `records.json` 放在项目根目录，`index.html` 放在可访问的位置
+3. 将 `index.html` 放在可访问的位置
+4. 对 Agent 说「记录时间」，首次使用时会自动创建 `records.json`（可参考 `records.example.json` 了解数据格式）
 
 ### 方式三：扣子（Coze）/ 飞书 / 通用 Agent
 
 1. 打开 `SKILL.md`，复制全部内容
 2. 粘贴到你的智能体的 **System Prompt（系统提示词）** 中
-3. 将 `records.json` 上传为知识库文件，或将内容粘贴进去
+3. 将 `records.example.json` 上传为知识库文件（了解数据格式），首次记录时 Agent 会自动创建你的 `records.json`
 4. 开始对话记录
 
 ---
@@ -80,6 +83,13 @@ Agent：已记录 3 条，共 80 分钟 ✅
       - 打游戏 20分钟（娱乐）
       - 吃饭 30分钟（生活）
       今天已记录 3 条，共 80 分钟。
+```
+
+### 带细节的记录
+
+```
+你：看了半小时《把时间当做朋友》
+Agent：已记录：看书（把时间当做朋友）30分钟（学习）✅  今天已记录 1 条，共 30 分钟。
 ```
 
 ### 查看统计
@@ -227,6 +237,15 @@ cp records.json ~/backup/records-$(date +%Y%m%d).json
 ### 跨平台
 
 同一份 `records.json` 在 Claude Code、Cursor、扣子、飞书等所有平台上格式完全一致，无需转换。
+
+### 跨平台迁移
+
+```
+你：导出数据
+Agent：📦 数据导出完成
+      [完整 JSON 内容]
+      使用方法：复制 JSON，在新平台对 Agent 说「导入数据」并粘贴
+```
 
 ---
 

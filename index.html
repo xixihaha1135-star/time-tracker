@@ -509,6 +509,11 @@
       color: var(--text-muted);
       margin-left: 8px;
     }
+    .cal-record-item .rec-detail {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-left: 4px;
+    }
     .cal-record-item .rec-duration {
       font-weight: 600;
       color: var(--accent);
@@ -979,7 +984,7 @@
   // =========================================================================
   // Constants
   // =========================================================================
-  const DATA_URL = './records.json';
+  const DATA_URL = './records.example.json';
   const CHART_COLORS = [
     'var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)',
     'var(--chart-5)', 'var(--chart-6)', 'var(--chart-7)', 'var(--chart-8)'
@@ -1452,6 +1457,7 @@
       html += '<div class="cal-record-item">';
       html += '<div>';
       html += `<span class="rec-activity">${r.activity}</span>`;
+      if (r.detail) html += `<span class="rec-detail">（${r.detail}）</span>`;
       html += `<span class="rec-category">${r.category || getCategoryForActivity(r.activity, appData.categories)}</span>`;
       html += '</div>';
       html += `<span class="rec-duration">${fmt(r.duration_min)}</span>`;

@@ -21,6 +21,7 @@
 - **デュアルテーマワンクリック切替** — ダーク GitHub スタイル（目に優しい）/ ライト Apple Health スタイル（クリーン）、さまざまなシーンに対応
 - **データはすべてあなたのもの** — すべての記録は単一の `records.json` ファイルに保存され、PCを変えても、プラットフォームを変えても、Agent を変えても、コピー＆ペーストで持ち運べます
 - **マルチプラットフォーム対応** — 同一の SKILL.md で Claude Code / Cursor / 扣子（Coze）/ 飛書（Lark）/ 汎用 AI Agent に対応
+- **日記レベルの詳細記録** — 記録時に具体的な詳細（書名、ゲーム名など）を自動抽出し、振り返った時に何をしていたか思い出せます
 
 ---
 
@@ -36,9 +37,10 @@ git clone https://github.com/xixihaha1135-star/time-tracker.git
 mkdir -p あなたのプロジェクト/.claude/skills/time-tracker
 cp time-tracker/SKILL.md あなたのプロジェクト/.claude/skills/time-tracker/
 
-# 3. 可視化ページとデータファイルもコピー
+# 3. 可視化ページをコピー
 cp time-tracker/index.html あなたのプロジェクト/.claude/skills/time-tracker/
-cp time-tracker/records.json あなたのプロジェクト/.claude/skills/time-tracker/
+
+# records.json は初回使用時に自動作成されます
 ```
 
 インストール後、Claude Code に直接話しかけるだけです：
@@ -51,13 +53,13 @@ cp time-tracker/records.json あなたのプロジェクト/.claude/skills/time-
 
 1. `SKILL.md` を開き、全内容をコピー
 2. `.cursorrules`、`copilot-instructions.md`、またはプロジェクトの agent 指示ファイルに貼り付け
-3. `records.json` をプロジェクトルートに、`index.html` をアクセス可能な場所に配置
+3. `index.html` をアクセス可能な場所に配置。エージェントに「時間を記録」と言うと、初回使用時に `records.json` を自動作成します（データ形式は `records.example.json` を参照）
 
 ### 方式3：扣子（Coze）/ 飛書 / 汎用 Agent
 
 1. `SKILL.md` を開き、全内容をコピー
 2. あなたのエージェントの **System Prompt（システムプロンプト）** に貼り付け
-3. `records.json` をナレッジベースファイルとしてアップロードするか、内容を貼り付け
+3. `records.example.json` をナレッジベースファイルとしてアップロード（データ形式の参考）。エージェントが初回使用時に `records.json` を自動作成します
 4. 会話を開始して記録
 
 ---
@@ -80,6 +82,13 @@ Agent：3 件記録しました、合計 80 分 ✅
       - ゲーム 20分（娯楽）
       - 食事 30分（生活）
       本日 3 件記録、合計 80 分。
+```
+
+### 詳細付き記録
+
+```
+あなた：「時間を味方につける」を30分読んだ
+Agent：記録しました：読書（時間を味方につける）30分（学習）✅  本日 1 件記録、合計 30 分。
 ```
 
 ### 統計の確認
@@ -227,6 +236,15 @@ cp records.json ~/backup/records-$(date +%Y%m%d).json
 ### クロスプラットフォーム
 
 同一の `records.json` が Claude Code、Cursor、扣子、飛書などすべてのプラットフォームで完全に互換性のある形式で、変換は不要です。
+
+### クロスプラットフォーム移行
+
+```
+あなた：データをエクスポートして
+Agent：📦 データのエクスポートが完了しました
+      [完全な JSON 内容]
+      使い方：JSON をコピーし、新しいプラットフォームで「データをインポートして」と言って貼り付けます
+```
 
 ---
 

@@ -21,6 +21,7 @@ Un Skill de suivi du temps multiplateforme. Dites à votre Agent en langage natu
 - **Deux thèmes en un clic** — Thème sombre style GitHub (reposant pour les yeux) / thème clair style Apple Health (épuré), adapté à tous les contextes.
 - **Vos données vous appartiennent** — Tous les enregistrements sont stockés dans un seul fichier `records.json`. Changez d'ordinateur, de plateforme ou d'Agent : copiez-collez et c'est tout.
 - **Multiplateforme** — Un seul SKILL.md compatible avec Claude Code / Cursor / Coze / Lark / tout Agent IA générique.
+- **Détails de niveau journal** — Extrait automatiquement les détails spécifiques (titre de livre, nom de jeu, etc.) lors de l'enregistrement, pour vous souvenir exactement de ce que vous faisiez.
 
 ---
 
@@ -36,9 +37,10 @@ git clone https://github.com/xixihaha1135-star/time-tracker.git
 mkdir -p votre-projet/.claude/skills/time-tracker
 cp time-tracker/SKILL.md votre-projet/.claude/skills/time-tracker/
 
-# 3. Copier également la page de visualisation et le fichier de données
+# 3. Copier la page de visualisation
 cp time-tracker/index.html votre-projet/.claude/skills/time-tracker/
-cp time-tracker/records.json votre-projet/.claude/skills/time-tracker/
+
+# records.json sera créé automatiquement lors de la première utilisation
 ```
 
 Une fois installé, dites simplement à Claude Code :
@@ -51,13 +53,13 @@ Une fois installé, dites simplement à Claude Code :
 
 1. Ouvrez `SKILL.md` et copiez tout son contenu
 2. Collez-le dans votre `.cursorrules`, `copilot-instructions.md` ou le fichier d'instructions agent de votre projet
-3. Placez `records.json` à la racine du projet et `index.html` à un emplacement accessible
+3. Placez `index.html` à un emplacement accessible. Dites « enregistrer du temps » à l'Agent — il crée automatiquement `records.json` (voir `records.example.json` pour le format)
 
 ### Méthode 3 : Coze / Lark / Agent générique
 
 1. Ouvrez `SKILL.md` et copiez tout son contenu
 2. Collez-le dans le **System Prompt** de votre agent
-3. Téléversez `records.json` comme fichier de base de connaissances, ou collez son contenu directement
+3. Téléversez `records.example.json` comme fichier de base de connaissances (pour le format). L'Agent crée automatiquement votre `records.json` à la première utilisation
 4. Commencez à enregistrer via la conversation
 
 ---
@@ -80,6 +82,13 @@ Agent : 3 entrées enregistrées, 80 min au total ✅
       - Jeux vidéo 20 min (Divertissement)
       - Repas 30 min (Vie quotidienne)
       Aujourd'hui : 3 entrées, 80 min au total.
+```
+
+### Enregistrer avec des détails
+
+```
+Vous : lecture de « Le temps est un ami » pendant 30 minutes
+Agent : Enregistré : Lecture (Le temps est un ami) 30 min (Étude) ✅  Aujourd'hui : 1 entrée, 30 min au total.
 ```
 
 ### Consulter les statistiques
@@ -227,6 +236,15 @@ Placez `records.json` à la racine du projet dans le nouvel environnement (ou à
 ### Multiplateforme
 
 Un même fichier `records.json` est entièrement compatible avec Claude Code, Cursor, Coze, Lark et toutes les autres plateformes — aucun format supplémentaire, aucune conversion nécessaire.
+
+### Migration multiplateforme
+
+```
+Vous : exporter mes données
+Agent : 📦 Exportation des données terminée
+      [contenu JSON complet]
+      Utilisation : copiez le JSON, dites « importer les données » sur la nouvelle plateforme et collez-le
+```
 
 ---
 

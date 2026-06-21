@@ -1,0 +1,133 @@
+{
+  "version": "2.0",
+  "aliases": {
+    "看英文原著": "看书",
+    "AI写代码": "AI技术研究",
+    "王者荣耀": "打游戏",
+    "无畏契约": "打游戏",
+    "把时间当做朋友": "看书"
+  },
+  "records": [
+    {
+      "id": "20260610-080000-aaaa",
+      "date": "2026-06-10",
+      "start": "",
+      "end": "",
+      "duration_min": 30,
+      "activity": "看书",
+      "detail": "把时间当做朋友",
+      "raw_input": "看《把时间当做朋友》半小时",
+      "created_at": "2026-06-10T08:00:00.000Z",
+      "category": "学习"
+    },
+    {
+      "id": "20260610-090000-bbbb",
+      "date": "2026-06-10",
+      "start": "",
+      "end": "",
+      "duration_min": 60,
+      "activity": "AI技术研究",
+      "raw_input": "用AI写代码一小时",
+      "created_at": "2026-06-10T09:00:00.000Z",
+      "category": "工作"
+    },
+    {
+      "id": "20260611-070000-cccc",
+      "date": "2026-06-11",
+      "start": "",
+      "end": "",
+      "duration_min": 30,
+      "activity": "健身",
+      "raw_input": "健身半小时",
+      "created_at": "2026-06-11T07:00:00.000Z",
+      "category": "运动"
+    },
+    {
+      "id": "20260611-120000-dddd",
+      "date": "2026-06-11",
+      "start": "",
+      "end": "",
+      "duration_min": 45,
+      "activity": "看书",
+      "detail": "英文原著",
+      "raw_input": "看英文原著45分钟",
+      "created_at": "2026-06-11T12:00:00.000Z",
+      "category": "学习"
+    },
+    {
+      "id": "20260611-180000-eeee",
+      "date": "2026-06-11",
+      "start": "",
+      "end": "",
+      "duration_min": 30,
+      "activity": "吃饭",
+      "raw_input": "吃饭半小时",
+      "created_at": "2026-06-11T18:00:00.000Z",
+      "category": "生活"
+    },
+    {
+      "id": "20260612-080000-ffff",
+      "date": "2026-06-12",
+      "start": "",
+      "end": "",
+      "duration_min": 120,
+      "activity": "做作业",
+      "raw_input": "数学作业两小时",
+      "created_at": "2026-06-12T08:00:00.000Z",
+      "category": "学习"
+    },
+    {
+      "id": "20260612-140000-1111",
+      "date": "2026-06-12",
+      "start": "",
+      "end": "",
+      "duration_min": 60,
+      "activity": "打游戏",
+      "detail": "无畏契约",
+      "raw_input": "打了把无畏契约一小时",
+      "created_at": "2026-06-12T14:00:00.000Z",
+      "category": "娱乐"
+    },
+    {
+      "id": "20260612-160000-2222",
+      "date": "2026-06-12",
+      "start": "",
+      "end": "",
+      "duration_min": 50,
+      "activity": "公众号",
+      "raw_input": "写公众号50分钟",
+      "created_at": "2026-06-12T16:00:00.000Z",
+      "category": "工作"
+    },
+    {
+      "id": "20260613-090000-3333",
+      "date": "2026-06-13",
+      "start": "",
+      "end": "",
+      "duration_min": 60,
+      "activity": "AI技术研究",
+      "raw_input": "研究AI工具一小时",
+      "created_at": "2026-06-13T09:00:00.000Z",
+      "category": "工作"
+    },
+    {
+      "id": "20260613-150000-4444",
+      "date": "2026-06-13",
+      "start": "",
+      "end": "",
+      "duration_min": 30,
+      "activity": "打游戏",
+      "detail": "王者荣耀",
+      "raw_input": "打了把王者荣耀半小时",
+      "created_at": "2026-06-13T15:00:00.000Z",
+      "category": "娱乐"
+    }
+  ],
+  "categories": {
+    "学习": ["看书", "做作业"],
+    "生活": ["吃饭", "洗漱洗衣", "休息"],
+    "运动": ["健身"],
+    "娱乐": ["打游戏"],
+    "工作": ["AI技术研究", "公众号"]
+  }
+}

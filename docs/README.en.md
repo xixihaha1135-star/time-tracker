@@ -21,6 +21,7 @@ A cross-platform time tracking Skill. Tell your Agent what you did and for how l
 - **Dual theme, one-click toggle** — Dark GitHub-style (eye-friendly) / Light Apple Health-style (clean), adapts to different usage contexts.
 - **Your data, fully yours** — All records live in a single `records.json` file. Switch computers, switch platforms, switch Agents — just copy and paste to take it with you.
 - **Multi-platform** — The same `SKILL.md` works with Claude Code / Cursor / Coze / Lark / any general-purpose AI Agent.
+- **Diary-level detail logging** — Automatically extracts specific details (book titles, game names, etc.) when logging, so you can remember exactly what you were doing when you look back.
 
 ---
 
@@ -36,9 +37,10 @@ git clone https://github.com/xixihaha1135-star/time-tracker.git
 mkdir -p your-project/.claude/skills/time-tracker
 cp time-tracker/SKILL.md your-project/.claude/skills/time-tracker/
 
-# 3. Copy the visualization page and data file too
+# 3. Copy the visualization page
 cp time-tracker/index.html your-project/.claude/skills/time-tracker/
-cp time-tracker/records.json your-project/.claude/skills/time-tracker/
+
+# records.json will be auto-created on first use — no need to copy
 ```
 
 After installation, just tell Claude Code:
@@ -51,13 +53,13 @@ After installation, just tell Claude Code:
 
 1. Open `SKILL.md` and copy the entire content
 2. Paste it into your `.cursorrules`, `copilot-instructions.md`, or your project's agent instruction file
-3. Place `records.json` in the project root and `index.html` somewhere accessible
+3. Place `index.html` somewhere accessible. Say "log time" to the Agent — it auto-creates `records.json` on first use (see `records.example.json` for the data format)
 
 ### Option 3: Coze / Lark / Any General Agent
 
 1. Open `SKILL.md` and copy the entire content
 2. Paste it into your Agent's **System Prompt**
-3. Upload `records.json` as a knowledge base file, or paste its contents
+3. Upload `records.example.json` as a knowledge base file (for data format reference). The Agent auto-creates your `records.json` on first use
 4. Start chatting to log your time
 
 ---
@@ -80,6 +82,13 @@ Agent: Logged 3 entries, 80 min total ✅
       - 打游戏 — 20 min (Entertainment)
       - 吃饭 — 30 min (Daily Life)
       Today: 3 entries, 80 min total.
+```
+
+### Logging with Details
+
+```
+You: read "How to Make Time Your Friend" for half an hour
+Agent: Logged: Reading (How to Make Time Your Friend) — 30 min (Study) ✅  Today: 1 entry, 30 min total.
 ```
 
 ### Viewing Stats
@@ -227,6 +236,15 @@ Place `records.json` in the project root (or any path `SKILL.md` can detect) of 
 ### Cross-platform
 
 The same `records.json` has an identical format across Claude Code, Cursor, Coze, Lark, and all other platforms — no conversion needed.
+
+### Cross-platform Migration
+
+```
+You: export my data
+Agent: 📦 Data export complete
+      [full JSON content]
+      How to use: copy the JSON, say "import data" on the new platform and paste
+```
 
 ---
 

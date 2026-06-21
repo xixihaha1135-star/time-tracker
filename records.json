@@ -590,8 +590,8 @@
       "start": null,
       "end": null,
       "duration_min": 60,
-      "activity": "备考六级",
-      "raw_input": "18号复习1h",
+      "activity": "课程学习",
+      "raw_input": "18号期末复习1h",
       "created_at": "2026-06-21T07:16:00.000Z"
     },
     {
@@ -600,8 +600,8 @@
       "start": null,
       "end": null,
       "duration_min": 60,
-      "activity": "玩手机",
-      "raw_input": "18号娱乐1h",
+      "activity": "休息",
+      "raw_input": "18号放松聊天1h",
       "created_at": "2026-06-21T07:16:00.000Z"
     }
   ],

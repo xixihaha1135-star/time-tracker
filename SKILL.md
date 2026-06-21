@@ -55,9 +55,8 @@ description: |
 |------|------|
 | `version` | 固定 `"2.0"` |
 | `aliases` | 别名映射，key 是用户输入的活动名，value 是标准活动名 |
-| `records[]` | 记录数组，每条记录包含 id/date/start/end/duration_min/activity/detail/raw_input/created_at/category |
+| `records[]` | 记录数组，每条记录包含 id/date/start/end/duration_min/activity/detail/raw_input/created_at/category。其中 `detail` 可选，记录具体细节（书名、游戏名等），没有时省略 |
 | `categories` | 类别字典，key 是类别名，value 是该类别下的活动名数组 |
-| `detail` | 可选。活动的具体细节，如书名、游戏名。没有细节时省略此字段 |
 
 v2 与 v1 的核心差异：每条记录多了 `category` 字段，顶层多了 `categories` 字典。
 

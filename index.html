@@ -949,7 +949,15 @@
     <!-- Toolbar -->
     <div class="toolbar">
       <h1 class="toolbar-title">⏱ 时间统计</h1>
-      <button class="theme-toggle" id="themeToggle" title="切换主题" aria-label="切换主题">☀</button>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span id="dataSourceBadge" style="font-size:11px;padding:2px 8px;border-radius:10px;background:var(--bg-tertiary);color:var(--text-secondary);white-space:nowrap;">示例数据</span>
+        <label class="theme-toggle" title="导入 records.json 数据文件" style="cursor:pointer;font-size:14px;">
+          📂
+          <input type="file" accept=".json" id="fileImport" style="display:none;" onchange="handleFileImport(event)">
+        </label>
+        <button class="theme-toggle" title="清除本地导入的数据" onclick="clearLocalData()" style="font-size:14px;">🗑️</button>
+        <button class="theme-toggle" id="themeToggle" title="切换主题" aria-label="切换主题">☀</button>
+      </div>
     </div>
 
     <!-- Tabs -->
@@ -1170,15 +1178,53 @@
   // =========================================================================
   // Data loading: v2 schema support with v1 fallback
   // =========================================================================
+  // 数据来源标识
+  let dataSource = '';
+
   async function loadData() {
     try {
-      let resp = await fetch(DATA_URL);
-      if (!resp.ok) {
-        // records.json 不存在时回退到示例数据
-        resp = await fetch('./records.example.json');
+      let raw = null;
+
+      // 1. 优先从 URL 参数 ?data=URL 加载（智能体生成链接时使用）
+      const urlParams = new URLSearchParams(window.location.search);
+      const dataUrl = urlParams.get('data');
+      if (dataUrl) {
+        try {
+          const resp = await fetch(decodeURIComponent(dataUrl));
+          if (resp.ok) {
+            raw = await resp.json();
+            dataSource = '链接数据';
+          }
+        } catch(e) { /* URL加载失败，尝试其他方式 */ }
       }
-      if (!resp.ok) throw new Error('HTTP ' + resp.status);
-      const raw = await resp.json();
+
+      // 2. 尝试从 localStorage 加载（用户手动导入过的数据）
+      if (!raw) {
+        const cached = localStorage.getItem('timeTrackerData');
+        if (cached) {
+          try {
+            raw = JSON.parse(cached);
+            dataSource = '本地导入';
+          } catch(e) { localStorage.removeItem('timeTrackerData'); }
+        }
+      }
+
+      // 3. 尝试 fetch 同目录 records.json
+      if (!raw) {
+        let resp = await fetch(DATA_URL);
+        if (resp.ok) {
+          raw = await resp.json();
+          dataSource = 'records.json';
+        }
+      }
+
+      // 4. 回退到示例数据
+      if (!raw) {
+        const resp = await fetch('./records.example.json');
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        raw = await resp.json();
+        dataSource = '示例数据';
+      }
 
       // Detect version
       const version = raw.version || '1.0';
@@ -1196,10 +1242,56 @@
 
       appData = { version, categories, aliases, records };
       allRecords = records;
+      updateDataSourceBadge();
       return { version, categories, aliases, records };
     } catch (e) {
       showError(e.message);
       throw e;
+    }
+  }
+
+  function updateDataSourceBadge() {
+    const badge = document.getElementById('dataSourceBadge');
+    if (badge) badge.textContent = dataSource;
+  }
+
+  function handleFileImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (!data.records) throw new Error('无效的数据格式');
+        localStorage.setItem('timeTrackerData', JSON.stringify(data));
+        dataSource = '本地导入';
+        // 重新处理并渲染
+        const version = data.version || '1.0';
+        const categories = data.categories || {};
+        const aliases = data.aliases || {};
+        let records = data.records || [];
+        if (version === '1.0' || !records[0]?.category) {
+          records = records.map(r => ({
+            ...r,
+            category: r.category || getCategoryForActivity(r.activity, categories)
+          }));
+        }
+        appData = { version, categories, aliases, records };
+        allRecords = records;
+        updateDataSourceBadge();
+        renderAll();
+        alert('导入成功！共 ' + records.length + ' 条记录');
+      } catch(err) {
+        alert('导入失败：' + err.message);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function clearLocalData() {
+    if (confirm('确定清除本地导入的数据？清除后将恢复默认数据源。')) {
+      localStorage.removeItem('timeTrackerData');
+      location.reload();
     }
   }
 

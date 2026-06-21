@@ -38,7 +38,7 @@ mkdir -p ваш-проект/.claude/skills/time-tracker
 cp time-tracker/SKILL.md ваш-проект/.claude/skills/time-tracker/
 
 # 3. Скопируйте страницу визуализации
-cp time-tracker/index.html ваш-проjet/.claude/skills/time-tracker/
+cp time-tracker/index.html ваш-проект/.claude/skills/time-tracker/
 
 # records.json создаётся автоматически при первом использовании
 ```

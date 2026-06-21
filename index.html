@@ -990,6 +990,28 @@
     'var(--chart-5)', 'var(--chart-6)', 'var(--chart-7)', 'var(--chart-8)'
   ];
 
+  const CATEGORY_COLORS = {
+    '学习': '#58a6ff', '生活': '#d29922', '运动': '#3fb950',
+    '娱乐': '#f85149', '工作': '#bc8cff', '其他': '#8b949e'
+  };
+
+  // Cached resolved CSS variable values — invalidated on theme change
+  let _styleCache = null;
+  function getStyleCache() {
+    if (!_styleCache) {
+      const s = getComputedStyle(document.documentElement);
+      _styleCache = {
+        chartColors: CHART_COLORS.map(c => s.getPropertyValue(c.replace(/var\(|\)/g, '')).trim()),
+        textPrimary: s.getPropertyValue('--text-primary').trim(),
+        textSecondary: s.getPropertyValue('--text-secondary').trim(),
+        textMuted: s.getPropertyValue('--text-muted').trim(),
+        bgPrimary: s.getPropertyValue('--bg-primary').trim(),
+        border: s.getPropertyValue('--border').trim()
+      };
+    }
+    return _styleCache;
+  }
+
   // =========================================================================
   // Global state
   // =========================================================================
@@ -1013,7 +1035,7 @@
     apply(theme) {
       document.documentElement.setAttribute('data-theme', theme);
       this.set(theme);
-      // Reset chart colors after theme change — charts need re-render
+      _styleCache = null; // invalidate cached CSS values
       if (appData) {
         renderAll();
       }
@@ -1045,7 +1067,7 @@
   // Utility: Resolve chart colors from CSS variables
   // =========================================================================
   function getChartColors() {
-    return CHART_COLORS.map(c => getComputedStyle(document.documentElement).getPropertyValue(c.replace(/var\(|\)/g, '')).trim());
+    return getStyleCache().chartColors;
   }
 
   // =========================================================================
@@ -1267,6 +1289,7 @@
   let calState = null;    // { level: 1|2|3, year, month: 0-11, day }
   let calChart = null;    // Chart.js instance for day detail doughnut
   let calInitialized = false;
+  let calContainer = null; // Cached reference to calendar-view element
 
   function destroyCalChart() {
     if (calChart) {
@@ -1303,8 +1326,6 @@
   // ---- Level 1: Year Overview ----
   function renderCalendarL1(container) {
     const { year } = calState;
-    const dateMap = buildDateMap(allRecords);
-
     // Available years from data (always allow current year at minimum)
     const dataYears = new Set(allRecords.map(r => parseInt(r.date.slice(0, 4))));
     const available = Array.from(dataYears).sort();
@@ -1498,9 +1519,7 @@
       totalMin > 0 ? ((v / totalMin) * 100).toFixed(1) + '%' : '0%'
     );
 
-    const style = getComputedStyle(document.documentElement);
-    const textSecondary = style.getPropertyValue('--text-secondary').trim();
-    const bgPrimary      = style.getPropertyValue('--bg-primary').trim();
+    const sc = getStyleCache();
 
     calChart = new Chart(canvas, {
       type: 'doughnut',
@@ -1509,7 +1528,7 @@
         datasets: [{
           data: data,
           backgroundColor: labels.map((_, i) => colors[i % colors.length]),
-          borderColor: bgPrimary,
+          borderColor: sc.bgPrimary,
           borderWidth: 2
         }]
       },
@@ -1521,7 +1540,7 @@
           legend: {
             position: 'bottom',
             labels: {
-              color: textSecondary,
+              color: sc.textSecondary,
               padding: 14,
               font: { size: 12 },
               generateLabels: function(chart) {
@@ -1538,10 +1557,10 @@
             }
           },
           tooltip: {
-            backgroundColor: bgPrimary,
-            titleColor: textSecondary,
-            bodyColor: textSecondary,
-            borderColor: style.getPropertyValue('--border').trim(),
+            backgroundColor: sc.bgPrimary,
+            titleColor: sc.textSecondary,
+            bodyColor: sc.textSecondary,
+            borderColor: sc.border,
             borderWidth: 1,
             callbacks: {
               label: function(ctx) {
@@ -1555,13 +1574,18 @@
   }
 
   // ---- Navigation ----
+  function getCalContainer() {
+    if (!calContainer) calContainer = document.getElementById('calendar-view');
+    return calContainer;
+  }
+
   function calNavYear(dir) {
     calState.year += dir;
     calState.level = 1;
     calState.month = new Date().getMonth();
     calState.day   = null;
     destroyCalChart();
-    renderCalendarL1(document.getElementById('calendar-view'));
+    renderCalendarL1(getCalContainer());
   }
 
   function calNavMonth(m) {
@@ -1569,33 +1593,33 @@
     calState.level = 2;
     calState.day   = null;
     destroyCalChart();
-    renderCalendarL2(document.getElementById('calendar-view'));
+    renderCalendarL2(getCalContainer());
   }
 
   function calNavDay(d) {
     calState.day   = d;
     calState.level = 3;
     destroyCalChart();
-    renderCalendarL3(document.getElementById('calendar-view'));
+    renderCalendarL3(getCalContainer());
   }
 
   function calGoLevel1() {
     calState.level = 1;
     calState.day   = null;
     destroyCalChart();
-    renderCalendarL1(document.getElementById('calendar-view'));
+    renderCalendarL1(getCalContainer());
   }
 
   function calGoLevel2() {
     calState.level = 2;
     calState.day   = null;
     destroyCalChart();
-    renderCalendarL2(document.getElementById('calendar-view'));
+    renderCalendarL2(getCalContainer());
   }
 
   // ---- Main entry: renderCalendar() ----
   function renderCalendar() {
-    const container = document.getElementById('calendar-view');
+    const container = getCalContainer();
 
     if (!allRecords || allRecords.length === 0) {
       showEmpty('calendar-view');
@@ -1627,17 +1651,8 @@
   // =========================================================================
   let trendState = null;    // { timeRange: 30, activeCategories: Set, chart: null }
 
-  const TREND_CATEGORY_COLORS = {
-    '学习': '#58a6ff',
-    '生活': '#d29922',
-    '运动': '#3fb950',
-    '娱乐': '#f85149',
-    '工作': '#bc8cff',
-    '其他': '#8b949e'
-  };
-
   function getTrendCategoryColor(cat) {
-    return TREND_CATEGORY_COLORS[cat] || '#8b949e';
+    return CATEGORY_COLORS[cat] || '#8b949e';
   }
 
   function destroyTrendChart() {
@@ -1795,11 +1810,7 @@
       return;
     }
 
-    const style = getComputedStyle(document.documentElement);
-    const textSecondary = style.getPropertyValue('--text-secondary').trim();
-    const textMuted = style.getPropertyValue('--text-muted').trim();
-    const border = style.getPropertyValue('--border').trim();
-    const bgPrimary = style.getPropertyValue('--bg-primary').trim();
+    const sc = getStyleCache();
 
     trendState.chart = new Chart(canvas, {
       type: 'line',
@@ -1816,10 +1827,10 @@
             display: false
           },
           tooltip: {
-            backgroundColor: bgPrimary,
-            titleColor: textSecondary,
-            bodyColor: textSecondary,
-            borderColor: border,
+            backgroundColor: sc.bgPrimary,
+            titleColor: sc.textSecondary,
+            bodyColor: sc.textSecondary,
+            borderColor: sc.border,
             borderWidth: 1,
             padding: 12,
             callbacks: {
@@ -1861,11 +1872,11 @@
           x: {
             stacked: true,
             grid: {
-              color: border,
+              color: sc.border,
               drawBorder: false
             },
             ticks: {
-              color: textMuted,
+              color: sc.textMuted,
               maxTicksLimit: 10,
               font: { size: 11 }
             }
@@ -1873,11 +1884,11 @@
           y: {
             stacked: true,
             grid: {
-              color: border,
+              color: sc.border,
               drawBorder: false
             },
             ticks: {
-              color: textMuted,
+              color: sc.textMuted,
               font: { size: 11 },
               callback: function(value) {
                 if (value >= 60) {
@@ -1926,17 +1937,8 @@
   // =========================================================================
   let reportState = { range: 'week', chart: null };
 
-  const REPORT_CATEGORY_COLORS = {
-    '学习': '#58a6ff',
-    '生活': '#d29922',
-    '运动': '#3fb950',
-    '娱乐': '#f85149',
-    '工作': '#bc8cff',
-    '其他': '#8b949e'
-  };
-
   function getReportCategoryColor(cat) {
-    return REPORT_CATEGORY_COLORS[cat] || '#8b949e';
+    return CATEGORY_COLORS[cat] || '#8b949e';
   }
 
   function destroyReportChart() {
@@ -2009,15 +2011,15 @@
       const text = chart.config._centerText || '';
       if (!text) return;
 
-      const style = getComputedStyle(document.documentElement);
+      const sc = getStyleCache();
       ctx.save();
       ctx.font = 'bold 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      ctx.fillStyle = style.getPropertyValue('--text-primary').trim();
+      ctx.fillStyle = sc.textPrimary;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(text, centerX, centerY - 4);
       ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      ctx.fillStyle = style.getPropertyValue('--text-muted').trim();
+      ctx.fillStyle = sc.textMuted;
       ctx.fillText('总计', centerX, centerY + 20);
       ctx.restore();
     }
@@ -2110,9 +2112,7 @@
     var data = sortedCats.map(function(c) { return catTotals[c] || 0; });
     var colors = sortedCats.map(function(c) { return getReportCategoryColor(c); });
 
-    var style = getComputedStyle(document.documentElement);
-    var textSecondary = style.getPropertyValue('--text-secondary').trim();
-    var bgPrimary = style.getPropertyValue('--bg-primary').trim();
+    var sc = getStyleCache();
 
     // Compute percentages and trend arrows
     var percentages = data.map(function(v) {
@@ -2128,7 +2128,7 @@
         datasets: [{
           data: data,
           backgroundColor: colors,
-          borderColor: bgPrimary,
+          borderColor: sc.bgPrimary,
           borderWidth: 2
         }]
       },
@@ -2139,10 +2139,10 @@
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: bgPrimary,
-            titleColor: textSecondary,
-            bodyColor: textSecondary,
-            borderColor: style.getPropertyValue('--border').trim(),
+            backgroundColor: sc.bgPrimary,
+            titleColor: sc.textSecondary,
+            bodyColor: sc.textSecondary,
+            borderColor: sc.border,
             borderWidth: 1,
             callbacks: {
               label: function(ctx) {

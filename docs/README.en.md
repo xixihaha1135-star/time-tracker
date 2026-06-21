@@ -55,7 +55,30 @@ After installation, just tell Claude Code:
 2. Paste it into your `.cursorrules`, `copilot-instructions.md`, or your project's agent instruction file
 3. Place `index.html` somewhere accessible. Say "log time" to the Agent — it auto-creates `records.json` on first use (see `records.example.json` for the data format)
 
-### Option 3: Coze / Lark / Any General Agent
+### Option 3: Coze Agent (Recommended for Coze Users)
+
+Send the repo link to your agent and let it handle the setup:
+
+```
+Install the time tracker for me: https://github.com/xixihaha1135-star/time-tracker
+```
+
+Your agent will automatically:
+1. Clone the repo to its workspace
+2. Read `SKILL.md` to understand the logging rules
+3. Create your `records.json` (auto-generated on first log entry)
+
+After setup, just tell your agent:
+- "read for half an hour" → auto-logged
+- "show stats" → generates a text report
+
+**Data Privacy:** Your `records.json` stays in the agent's local workspace and is never pushed to GitHub. Each user's data is independent and private.
+
+**Viewing Visualizations:**
+- Open `index.html` locally to view your time stats (the page auto-loads `records.json` from the same directory)
+- For online viewing, fork this repo to your GitHub, enable GitHub Pages, and push your `records.json` to your fork
+
+### Option 4: Lark / Other General Agents
 
 1. Open `SKILL.md` and copy the entire content
 2. Paste it into your Agent's **System Prompt**
@@ -155,7 +178,9 @@ The live demo showcases three views, all fed by `records.json` (loaded from the 
 
 **Dual theme** support: toggle between dark (GitHub-style, default) and light (Apple Health-style) via the top-right button.
 
-> Full visualization page: https://xixihaha1135-star.github.io/time-tracker/
+> Live Demo (example data): https://xixihaha1135-star.github.io/time-tracker/
+>
+> View your own data: open `index.html` locally — the page auto-loads `records.json` from the same directory
 
 ---
 

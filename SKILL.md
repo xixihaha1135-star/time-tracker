@@ -410,6 +410,21 @@ git push origin main
 导入：X 条记录，Y 个类别，Z 个别名
 ```
 
+## Coze 智能体安装指南
+
+当用户说"帮我安装时间追踪"或提供仓库链接时，执行以下步骤：
+
+1. **克隆仓库**：`git clone https://github.com/xixihaha1135-star/time-tracker.git` 到工作目录
+2. **读取 SKILL.md**：理解记录规则和数据格式
+3. **初始化数据**：在克隆目录下创建 `records.json`（见下方初始化章节）
+4. **确认安装**：告诉用户"时间追踪已安装 ✅ 你可以开始记录了，比如说「看书半小时」"
+
+**重要：**
+- `records.json` 保持在 `.gitignore` 中，不要推送到 GitHub
+- 每个用户的数据独立存储在自己的工作目录中
+- 可视化页面 `index.html` 可本地打开，自动读取同目录下的 `records.json`
+- 每次记录后自动 `git add/commit/push` 同步到用户自己的仓库
+
 ## 初始化
 
 如果按"路径自动检测"中的 4 个路径都找不到 `records.json`：

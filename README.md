@@ -56,7 +56,28 @@ cp time-tracker/index.html 你的项目/.claude/skills/time-tracker/
 3. 将 `index.html` 放在可访问的位置
 4. 对 Agent 说「记录时间」，首次使用时会自动创建 `records.json`（可参考 `records.example.json` 了解数据格式）
 
-### 方式三：扣子（Coze）/ 飞书 / 通用 Agent
+### 方式三：扣子（Coze）智能体（推荐 Coze 用户）
+
+把仓库链接发给你的智能体，让它自己完成安装：
+
+
+
+智能体会自动完成以下步骤：
+1. 克隆仓库到工作目录
+2. 读取 `SKILL.md` 了解记录规则
+3. 创建你的 `records.json`（首次记录时自动生成）
+
+安装后直接对智能体说：
+- 「看书半小时」→ 自动记录
+- 「看统计」→ 生成文字报告
+
+**数据隐私说明：** 你的 `records.json` 保存在智能体本地工作目录，不会推送到 GitHub。每个人的数据独立，互不影响。
+
+**查看可视化图表：**
+- 本地打开 `index.html` 即可查看你的时间统计（页面自动读取同目录下的 `records.json`）
+- 如果需要在线查看，fork 本仓库到你的 GitHub，启用 GitHub Pages，并将你的 `records.json` 推送到你的 fork
+
+### 方式四：飞书 / 其他通用 Agent
 
 1. 打开 `SKILL.md`，复制全部内容
 2. 粘贴到你的智能体的 **System Prompt（系统提示词）** 中
@@ -156,7 +177,9 @@ Agent：已删除 ✅
 
 支持 **双主题**：右上角一键切换暗色（GitHub 风格，默认）和亮色（Apple Health 风格）。
 
-> 完整可视化页面：https://xixihaha1135-star.github.io/time-tracker/
+> 在线 Demo（示例数据）：https://xixihaha1135-star.github.io/time-tracker/
+>
+> 查看你的真实数据：本地打开 `index.html`，页面自动加载同目录下的 `records.json`
 
 ---
 

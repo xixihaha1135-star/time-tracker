@@ -984,7 +984,7 @@
   // =========================================================================
   // Constants
   // =========================================================================
-  const DATA_URL = './records.example.json';
+  const DATA_URL = './records.json';
   const CHART_COLORS = [
     'var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)',
     'var(--chart-5)', 'var(--chart-6)', 'var(--chart-7)', 'var(--chart-8)'
@@ -1150,7 +1150,11 @@
   // =========================================================================
   async function loadData() {
     try {
-      const resp = await fetch(DATA_URL);
+      let resp = await fetch(DATA_URL);
+      if (!resp.ok) {
+        // records.json 不存在时回退到示例数据
+        resp = await fetch('./records.example.json');
+      }
       if (!resp.ok) throw new Error('HTTP ' + resp.status);
       const raw = await resp.json();
 

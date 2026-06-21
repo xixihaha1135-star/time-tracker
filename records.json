@@ -573,6 +573,36 @@
       "activity": "打游戏",
       "raw_input": "前天打游戏看比赛3h",
       "created_at": "2026-06-21T06:53:00.000Z"
+    },
+    {
+      "id": "20260618-000000-m3n4",
+      "date": "2026-06-18",
+      "start": null,
+      "end": null,
+      "duration_min": 180,
+      "activity": "工作",
+      "raw_input": "18号工作3h",
+      "created_at": "2026-06-21T07:16:00.000Z"
+    },
+    {
+      "id": "20260618-000000-o5p6",
+      "date": "2026-06-18",
+      "start": null,
+      "end": null,
+      "duration_min": 60,
+      "activity": "备考六级",
+      "raw_input": "18号复习1h",
+      "created_at": "2026-06-21T07:16:00.000Z"
+    },
+    {
+      "id": "20260618-000000-q7r8",
+      "date": "2026-06-18",
+      "start": null,
+      "end": null,
+      "duration_min": 60,
+      "activity": "玩手机",
+      "raw_input": "18号娱乐1h",
+      "created_at": "2026-06-21T07:16:00.000Z"
     }
   ],
   "categories": {

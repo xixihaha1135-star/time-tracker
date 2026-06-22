@@ -10,20 +10,28 @@ description: |
 
 ## 安装（只做一次）
 
-用户给仓库链接说"帮我安装"时：
+用户给仓库链接说"帮我安装"时，先问一个问题：
+
+**「你有 GitHub 账号吗？」**
+
+### 有 GitHub → 完整版（在线图表 + 自动同步）
+
+1. 让用户 fork 仓库到自己账号
+2. 用用户 fork 的地址克隆：`git clone https://github.com/<用户名>/time-tracker.git`
+3. 在克隆目录创建 `records.json`（见下方"初始化"）
+4. 引导用户启用 GitHub Pages：仓库 Settings → Pages → Source 选 master 分支 → Save
+5. 告诉用户：**安装好了 ✅ 你的图表页面：https://<用户名>.github.io/time-tracker/ 试试说「看书半小时」**
+6. 以后每次记录后 `git push`，图表自动更新
+
+### 没有 GitHub → 纯记录版（功能完整，无在线图表）
 
 1. 克隆仓库：`git clone https://github.com/xixihaha1135-star/time-tracker.git`
-2. 读这个 SKILL.md（你正在读）
-3. 在克隆目录创建 `records.json`（见下方"初始化"）
-4. 告诉用户：**安装好了 ✅ 试试说「看书半小时」**
+2. 在克隆目录创建 `records.json`（见下方"初始化"）
+3. 告诉用户：**安装好了 ✅ 试试说「看书半小时」**
+4. 看图表的方式：你可以随时说「看统计」，我会生成文字报告；也可以把 index.html 发你，浏览器打开后点右上角📂导入 records.json 查看
+5. 后续如果用户注册了 GitHub，随时可以转成完整版——只需 fork 仓库、把数据推上去、开 Pages
 
-如果用户有 GitHub 账号且想要在线图表，额外做：
-- 让用户 fork 仓库到自己账号
-- 用用户 fork 的地址重新 clone
-- 让用户启用 GitHub Pages（Settings → Pages → Source 选 master 分支）
-- 以后每次记录后 `git push`，图表自动更新
-
-**没有 GitHub 也完全能用**——记录和统计不需要 GitHub。
+**两种方式记录功能完全一样，区别只在于有没有在线图表页面。**
 
 ## 数据文件
 

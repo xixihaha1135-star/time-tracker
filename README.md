@@ -2,7 +2,7 @@
 
 # Time Tracker ⏱
 
-> 时间是最核心的生产资料——你花在哪，决定了你成为谁。
+> 时间是最核心的生产料——你花在哪，决定了你成为谁。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![GitHub Pages](https://img.shields.io/badge/Demo-GitHub%20Pages-brightgreen)](https://xixihaha1135-star.github.io/time-tracker/)
@@ -21,7 +21,6 @@
 - **双主题一键切换** — 暗色 GitHub 风格（护眼） / 亮色 Apple Health 风格（清爽），适应不同使用场景
 - **数据全归你** — 所有记录存在单个 `records.json` 文件里，换电脑、换平台、换 Agent，复制粘贴即可带走
 - **多平台通用** — 同一份 SKILL.md 同时支持 Claude Code / Cursor / 扣子（Coze）/ 飞书 / 通用 AI Agent
-- **日记级细节记录** — 记录时自动提取具体细节（书名、游戏名等），回看时能想起当时在做什么
 
 ---
 
@@ -56,26 +55,29 @@ cp time-tracker/index.html 你的项目/.claude/skills/time-tracker/
 3. 将 `index.html` 放在可访问的位置
 4. 对 Agent 说「记录时间」，首次使用时会自动创建 `records.json`（可参考 `records.example.json` 了解数据格式）
 
-### 方式三：扣子（Coze）智能体（推荐 Coze 用户）
+### 方式三：扣子（Coze）智能体
 
 把仓库链接发给你的智能体，让它自己完成安装：
 
+> 帮我安装时间追踪技能：https://github.com/xixihaha1135-star/time-tracker
 
+**智能体安装指引（Agent 看这里）：**
 
-智能体会自动完成以下步骤：
-1. 克隆仓库到工作目录
-2. 读取 `SKILL.md` 了解记录规则
-3. 创建你的 `records.json`（首次记录时自动生成）
+1. 克隆仓库到工作目录：`git clone https://github.com/xixihaha1135-star/time-tracker.git`
+2. 读取 `SKILL.md` 了解记录规则和数据格式
+3. 每次用户记录时间时，写入 `records.json`（参考 `records.example.json` 格式）
+4. 每次记录后执行 `git add records.json && git commit -m "记录时间" && git push` 同步数据
+5. 用户的 GitHub Pages 地址固定为 `https://<用户名>.github.io/time-tracker/`，页面自动读取 records.json 展示图表
+6. **不要**把用户个人的 records.json 推到别人的仓库——每个人 fork 自己的仓库，数据独立互不影响
 
-安装后直接对智能体说：
-- 「看书半小时」→ 自动记录
-- 「看统计」→ 生成文字报告
+**用户需要做的：**
 
-**数据隐私说明：** 你的 `records.json` 保存在智能体本地工作目录，不会推送到 GitHub。每个人的数据独立，互不影响。
+1. Fork 本仓库到你自己的 GitHub 账号
+2. 在你 fork 的仓库中启用 GitHub Pages（Settings → Pages → Source 选 main/master 分支）
+3. 把你 fork 后的仓库链接发给你的智能体
+4. 搞定！以后对智能体说「看书半小时」就会自动记录，你的 GitHub Pages 自动更新
 
-**查看可视化图表：**
-- 本地打开 `index.html` 即可查看你的时间统计（页面自动读取同目录下的 `records.json`）
-- 如果需要在线查看，fork 本仓库到你的 GitHub，启用 GitHub Pages，并将你的 `records.json` 推送到你的 fork
+**查看可视化图表：** 你的固定链接 `https://<你的用户名>.github.io/time-tracker/`，每次记录后自动刷新，无需手动操作。
 
 ### 方式四：飞书 / 其他通用 Agent
 
@@ -167,7 +169,7 @@ Agent：已删除 ✅
 
 ## 可视化
 
-在线 Demo 展示三种视图，数据来自 `records.json`，页面在同目录下直接加载：
+在线 Demo 展示三种视图，数据来自 `records.json`，页面自动加载同目录下的数据文件：
 
 | 视图 | 说明 |
 |------|------|
@@ -179,7 +181,7 @@ Agent：已删除 ✅
 
 > 在线 Demo（示例数据）：https://xixihaha1135-star.github.io/time-tracker/
 >
-> 查看你的真实数据：本地打开 `index.html`，页面自动加载同目录下的 `records.json`
+> 查看你的真实数据：fork 本仓库，启用 GitHub Pages，你的固定链接自动展示你的数据
 
 ---
 

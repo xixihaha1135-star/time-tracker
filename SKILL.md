@@ -413,16 +413,26 @@ git push origin main
 
 当用户说"帮我安装时间追踪"或提供仓库链接时，执行以下步骤：
 
-1. **克隆仓库**：`git clone https://github.com/xixihaha1135-star/time-tracker.git` 到工作目录
-2. **读取 SKILL.md**：理解记录规则和数据格式
-3. **初始化数据**：在克隆目录下创建 `records.json`（见下方初始化章节）
-4. **确认安装**：告诉用户"时间追踪已安装 ✅ 你可以开始记录了，比如说「看书半小时」"
+1. **Fork 仓库**：让用户先 fork https://github.com/xixihaha1135-star/time-tracker 到自己的 GitHub 账号
+2. **克隆用户 fork 的仓库**：`git clone https://github.com/<用户名>/time-tracker.git` 到工作目录
+3. **读取 SKILL.md**：理解记录规则和数据格式
+4. **初始化数据**：在克隆目录下创建 `records.json`（见下方初始化章节）
+5. **确认安装**：告诉用户"时间追踪已安装 ✅ 你可以开始记录了，比如说「看书半小时」"
 
-**重要：**
-- `records.json` 保持在 `.gitignore` 中，不要推送到 GitHub
-- 每个用户的数据独立存储在自己的工作目录中
-- 可视化页面 `index.html` 可本地打开，自动读取同目录下的 `records.json`
-- 每次记录后自动 `git add/commit/push` 同步到用户自己的仓库
+**每次记录后自动同步：**
+```
+cd <time-tracker目录>
+git add records.json
+git commit -m "记录时间"
+git push
+```
+这样用户的 GitHub Pages 会自动更新，随时能看到最新图表。
+
+**核心原则：**
+- 每个人 fork 自己的仓库，数据在自己的仓库里，互不影响
+- `records.json` 要 push 到用户的仓库，GitHub Pages 靠它展示数据
+- 用户的可视化页面地址固定：`https://<用户名>.github.io/time-tracker/`
+- 用户需要在 fork 的仓库中启用 GitHub Pages（Settings → Pages → Source 选 master 分支）
 
 ## 初始化
 

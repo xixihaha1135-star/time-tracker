@@ -949,7 +949,13 @@
     <!-- Toolbar -->
     <div class="toolbar">
       <h1 class="toolbar-title">⏱ 时间统计</h1>
-      <button class="theme-toggle" id="themeToggle" title="切换主题" aria-label="切换主题">☀</button>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <label class="theme-toggle" title="导入 records.json" style="cursor:pointer;font-size:14px;">
+          📂
+          <input type="file" accept=".json" style="display:none;" onchange="importData(event)">
+        </label>
+        <button class="theme-toggle" id="themeToggle" title="切换主题" aria-label="切换主题">☀</button>
+      </div>
     </div>
 
     <!-- Tabs -->
@@ -1190,7 +1196,15 @@
         if (resp.ok) { raw = await resp.json(); }
       }
 
-      // 3. 回退到示例数据
+      // 3. localStorage（无 GitHub 用户通过导入按钮加载数据）
+      if (!raw) {
+        const cached = localStorage.getItem('tt_data');
+        if (cached) {
+          try { raw = JSON.parse(cached); } catch(e) { localStorage.removeItem('tt_data'); }
+        }
+      }
+
+      // 4. 回退到示例数据
       if (!raw) {
         const resp = await fetch('./records.example.json');
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
@@ -2367,6 +2381,24 @@
         renderReport();
       });
     });
+  }
+
+
+  function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (!data.records) { alert('无效的数据格式，请选择 records.json 文件'); return; }
+        localStorage.setItem('tt_data', JSON.stringify(data));
+        location.reload();
+      } catch(err) {
+        alert('导入失败：' + err.message);
+      }
+    };
+    reader.readAsText(file);
   }
 
   // =========================================================================
